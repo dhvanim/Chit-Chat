@@ -4,7 +4,7 @@ import os
 import flask
 import flask_sqlalchemy
 import flask_socketio
-import models
+from datetime import datetime
 
 app = flask.Flask(__name__)
 
@@ -26,6 +26,46 @@ db = flask_sqlalchemy.SQLAlchemy(app)
 db.init_app(app)
 db.app = app
 
+
+''' temporary until i can fix the import issue '''
+
+# temp table - delete later
+class TestTable(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    testmessage = db.Column(db.String(20))
+    
+    def __init__(self, m):
+        self.testmessage = m
+    
+    def __repr__(self):
+        return '<TestTable message: %s>' % self.testmessage 
+
+# chat log table with userid, message, timestamp
+class ChatLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    userid = db.Column(db.String(20), nullable=False)
+    message = db.Column(db.String(280))
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+        
+    def __init__(self, u, m, t):
+        self.userid = u
+        self.message = m
+        self.timestamp = t
+        
+    def __repr__(self):
+        return '<ChatLog message: %s>' % self.message 
+
+# users table with userid and status
+class Users(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    userid = db.Column(db.String(20), unique=True)
+    active = db.Column(db.Boolean())
+    
+    def __repr__(self):
+        return '<Users %s: %s>' % self.userid, self.active
+
+''' end of temp fix '''
+
 db.create_all()
 db.session.commit()
 
@@ -42,6 +82,9 @@ def on_disconnect():
     
 @socketio.on('test socket')
 def on_test(data):
+    
+    db.session.add(TestTable(data['mssg']))
+    db.session.commit()
     
     print(data)
 
