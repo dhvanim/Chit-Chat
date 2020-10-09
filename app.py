@@ -34,7 +34,7 @@ db.app = app
 # temp table - delete later
 class TestTable(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    testmessage = db.Column(db.String(20))
+    testmessage = db.Column(db.String(280))
     
     def __init__(self, m):
         self.testmessage = m
@@ -75,15 +75,30 @@ class Users(db.Model):
 db.create_all()
 db.session.commit()
 
+users_active = 0
+
+def update_users_active(update):
+    global users_active
+    users_active += update
+    
+    socketio.emit('active users channel', {'users':users_active})
+    print(users_active)
+
 @socketio.on('connect')
 def on_connect():
     print('Someone connected!')
+    
+    update_users_active(1)
+    
     socketio.emit('connected', {
         'test': 'Connected'
     })
 
 @socketio.on('disconnect')
 def on_disconnect():
+    
+    update_users_active(-1)
+    
     print ('Someone disconnected!')
     
 @socketio.on('test socket')
