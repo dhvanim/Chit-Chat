@@ -4,21 +4,19 @@ import { Socket } from './Socket';
 import { Users } from './Users';
 
 
-function testSocket(event) {
-    let mssg = document.getElementById("typeinput");
-    Socket.emit('test socket', {'mssg':mssg.value});
-    console.log('ayo sent');
-    
-    event.preventDefault();
-    mssg.value = "";
-}
-
-
 export function Content() {
+    
+    function sendChat(event) {
+        let mssg = document.getElementById("typeinput");
+        Socket.emit('send message channel', {'user':username, 'mssg':mssg.value});
+        console.log('message sent to server');
         
+        event.preventDefault();
+        mssg.value = "";
+    }
         
+    // get username from socket
     const [username, setUsername] = React.useState([""]);
-        
     function getUsername() {
         React.useEffect(() => {
                 Socket.on('get username channel', (data) => {
@@ -27,7 +25,6 @@ export function Content() {
                 });
             });
     }
-    
     getUsername();
     
     
@@ -36,6 +33,7 @@ export function Content() {
 
             <div class="header">
                 <h1> chat room tehe </h1>
+                
                 <Users />
             </div>
             
@@ -53,7 +51,7 @@ export function Content() {
             </div>
             
             <div class="form">
-                <form onSubmit={testSocket}>
+                <form onSubmit={sendChat}>
                     <input id="typeinput" type="text" placeholder="Type a message here..."></input>
                     <input id="submit" type="submit"></input>
                 </form>

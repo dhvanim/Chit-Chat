@@ -45,7 +45,7 @@ class TestTable(db.Model):
 # chat log table with userid, message, timestamp
 class ChatLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    userid = db.Column(db.String(20), nullable=False)
+    userid = db.Column(db.String(280), nullable=False)
     message = db.Column(db.String(280))
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
         
@@ -108,13 +108,17 @@ def on_disconnect():
     
     print ('Someone disconnected!')
     
-@socketio.on('test socket')
+@socketio.on('send message channel')
 def on_test(data):
     
-    db.session.add(TestTable(data['mssg']))
+    user = data['user']
+    message = data['mssg']
+    time = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    
+    db.session.add(ChatLog(user, message, time))
     db.session.commit()
     
-    print(data)
+    print(data, time)
 
 @app.route('/')
 def hello():
