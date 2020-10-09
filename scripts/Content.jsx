@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Socket } from './Socket';
 import { Users } from './Users';
 
+
 function testSocket(event) {
     let mssg = document.getElementById("typeinput");
     Socket.emit('test socket', {'mssg':mssg.value});
@@ -13,18 +14,33 @@ function testSocket(event) {
 }
 
 
-
 export function Content() {
+        
+        
+    const [username, setUsername] = React.useState([""]);
+        
+    function getUsername() {
+        React.useEffect(() => {
+                Socket.on('get username channel', (data) => {
+                    console.log("Received username from server: " + data['username']);
+                    setUsername(data['username']);
+                });
+            });
+    }
+    
+    getUsername();
     
     
     return (
         <div>
+
             <div class="header">
                 <h1> chat room tehe </h1>
                 <Users />
             </div>
             
             <div id="chatbox">
+                <p> user name: { username } </p>
                 <p> 
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent eu tristique tellus. Praesent vitae dignissim nibh. Integer ex turpis, hendrerit et lacus a, congue venenatis nisi. Nunc tempus quis massa ornare aliquet. Vivamus nec ultricies libero. Vestibulum laoreet tincidunt diam at viverra. Etiam est lorem, ullamcorper ac laoreet in, vestibulum at mi. Vestibulum hendrerit odio eget tortor finibus, feugiat gravida sem imperdiet. Fusce tristique justo id metus molestie rhoncus. Aenean consectetur lorem et ante imperdiet, ac ultricies elit pretium. Sed euismod nibh at tellus elementum malesuada. Aenean convallis, sem a luctus eleifend, est tortor semper ante, eu maximus urna libero eu sem. Proin ut quam sit amet leo accumsan imperdiet. Aliquam lacinia malesuada sem, eu tempor est hendrerit sed. Nulla eget pretium arcu. Donec maximus erat nisi, ut viverra metus imperdiet a.
                 <br />

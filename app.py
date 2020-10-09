@@ -84,11 +84,18 @@ def update_users_active(update):
     socketio.emit('active users channel', {'users':users_active})
     print(users_active)
 
+def send_username():
+    username = flask.request.sid
+    
+    socketio.emit('get username channel', {'username': username})
+    print(username)
+
 @socketio.on('connect')
 def on_connect():
     print('Someone connected!')
     
     update_users_active(1)
+    send_username()
     
     socketio.emit('connected', {
         'test': 'Connected'
