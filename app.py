@@ -55,7 +55,7 @@ class ChatLog(db.Model):
         self.timestamp = t
         
     def __repr__(self):
-        return '<ChatLog user: %s \n message: %s \n timestamp: %s>' % self.userid, self.message, self.timestamp 
+        return '<ChatLog userid: %s \n message: %s \n timestamp: %s>' %(self.userid, self.message, self.timestamp)
 
 # users table with userid and status
 class Users(db.Model):
@@ -68,7 +68,7 @@ class Users(db.Model):
         self.active = a
     
     def __repr__(self):
-        return '<Users %s: %s>' % self.userid, self.active
+        return '<Users %s: %s>' %(self.userid, self.active)
 
 ''' end of temp fix '''
 
@@ -89,6 +89,20 @@ def send_username():
     
     socketio.emit('get username channel', {'username': username})
     print(username)
+    
+def emit_chat_log():
+    output = []
+    
+    for entry in db.session.query(ChatLog).all():
+        d = {}
+        d['userid'] = entry.userid
+        d['message'] = entry.message
+        d['timestamp'] = entry.timestamp
+        output.append(d)
+    
+    
+
+    print(output)
 
 @socketio.on('connect')
 def on_connect():
@@ -100,6 +114,8 @@ def on_connect():
     socketio.emit('connected', {
         'test': 'Connected'
     })
+    
+    emit_chat_log()
 
 @socketio.on('disconnect')
 def on_disconnect():
@@ -109,7 +125,7 @@ def on_disconnect():
     print ('Someone disconnected!')
     
 @socketio.on('send message channel')
-def on_test(data):
+def save_chat_log(data):
     
     user = data['user']
     message = data['mssg']
