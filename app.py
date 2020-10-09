@@ -8,6 +8,8 @@ from datetime import datetime
 
 app = flask.Flask(__name__)
 
+app.static_folder = 'static'
+
 socketio = flask_socketio.SocketIO(app)
 socketio.init_app(app, cors_allowed_origins="*")
 
@@ -53,13 +55,17 @@ class ChatLog(db.Model):
         self.timestamp = t
         
     def __repr__(self):
-        return '<ChatLog message: %s>' % self.message 
+        return '<ChatLog user: %s \n message: %s \n timestamp: %s>' % self.userid, self.message, self.timestamp 
 
 # users table with userid and status
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     userid = db.Column(db.String(20), unique=True)
     active = db.Column(db.Boolean())
+    
+    def __init__(self, u, a):
+        self.userid = u
+        self.active = a
     
     def __repr__(self):
         return '<Users %s: %s>' % self.userid, self.active

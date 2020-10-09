@@ -1,0 +1,49 @@
+body {
+    font-family: Arial;
+    font-size: 13px;
+    margin:auto;
+}
+
+#content {
+    background-color:#f4c2c2;
+    margin:auto;
+    width:50%;
+    height: 85%;
+}
+
+h1 {
+    text-align:center;
+}
+
+.header {
+    padding:1px;
+}
+
+#chatbox {
+    height:75%;
+    background-color:#fff;
+    margin: 0px 10px;
+    overflow-y:scroll;
+}
+
+#chatbox p {
+    padding:10px;
+}
+
+.form {
+    margin:20px;
+}
+
+input {
+    padding:5px;
+}
+
+#typeinput {
+    float:left;
+    width:75%;
+}
+
+#submit {
+    float:right;
+    width:20%;
+}
