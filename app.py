@@ -72,69 +72,66 @@ class Users(db.Model):
 
 ''' end of temp fix '''
 
+
 db.create_all()
 db.session.commit()
 
+# uses global variable to update active users
 users_active = 0
-
 def update_users_active(update):
     global users_active
     users_active += update
     
     socketio.emit('active users channel', {'users':users_active})
-    print(users_active)
-
-def send_username():
-    username = flask.request.sid
     
-    socketio.emit('get username channel', {'username': username})
-    print(username)
-    
-def emit_chat_log():
+# returns chat log after timestamp
+def get_chat_log(timestamp):
     output = []
     
-    for entry in db.session.query(ChatLog).all():
+    if timestamp == 0:
+        query = ChatLog.query.all()
+    else:
+        query = ChatLog.query.filter(ChatLog.timestamp > timestamp).all()
+    
+    for entry in query:
         d = {}
         d['userid'] = entry.userid
         d['message'] = entry.message
-        d['timestamp'] = entry.timestamp
+        d['timestamp'] = str(entry.timestamp)
         output.append(d)
     
-    
+    if len(output) != 0:
+        timestamp = output[-1]['timestamp']
 
-    print(output)
+    return output, timestamp
+
+# saves message sent from client in db
+@socketio.on('send message channel')
+def save_message(data):
+    
+    userid = flask.request.sid
+    message = data['mssg']
+    timestamp = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+    
+    db.session.add(ChatLog(userid, message, timestamp))
+    db.session.commit()
+    
+    print(userid, message, timestamp)
 
 @socketio.on('connect')
 def on_connect():
     print('Someone connected!')
     
+    socketio.emit('connected', {'test': 'Connected'})
+    
     update_users_active(1)
-    send_username()
-    
-    socketio.emit('connected', {
-        'test': 'Connected'
-    })
-    
-    emit_chat_log()
 
 @socketio.on('disconnect')
 def on_disconnect():
-    
-    update_users_active(-1)
-    
     print ('Someone disconnected!')
     
-@socketio.on('send message channel')
-def save_chat_log(data):
-    
-    user = data['user']
-    message = data['mssg']
-    time = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-    
-    db.session.add(ChatLog(user, message, time))
-    db.session.commit()
-    
-    print(data, time)
+    update_users_active(-1)
+
 
 @app.route('/')
 def hello():
