@@ -131,7 +131,7 @@ def get_chat_log(timestamp):
     
     return output, lastEmittedTimeStamp[user]
 
-# emits chat log, does not if empty
+# emits chat log and timestamp, does not if empty
 def emit_chat_log():
     chat_log, timestamp = get_chat_log(get_lastEmittedTimeStamp())
     
@@ -140,7 +140,7 @@ def emit_chat_log():
     
     socketio.emit('chat log channel', {'chat_log':chat_log, 'timestamp':timestamp})
 
-# recieves message from client and saves to db
+# recieves message from client and saves to db, emits chat
 @socketio.on('message channel')
 def save_message(data):
     
@@ -158,6 +158,7 @@ def save_message(data):
     
 bot_commands = ['!! about', '!! help', "!! translate"]
 
+# reads command and calls appropriate function to execute, saves message
 def handle_bot(message):
     message_arr = message.split()
     command = message_arr[1]
@@ -166,21 +167,26 @@ def handle_bot(message):
     
     if (command == 'about'):
         reply = bot_about()
+        
     elif (command == 'help'):
         reply = bot_help()
+        
     elif (command == 'translate'):
         temp = message_arr[2:len(message_arr)]
         translate_string = " ".join(temp)
         reply = bot_translate(translate_string)
+        
     elif (command == 'spotify'):
         temp = message_arr[2:len(message_arr)]
         artist = " ".join(temp)
         reply = bot_spotify(artist)
+        
     else:
         reply = bot_unknown(command)
     
     bot_save_message(reply)
   
+# saves bot message to db and emits chat
 def bot_save_message(message):
     userid = "chit-chat-bot"
     message = message
@@ -192,16 +198,17 @@ def bot_save_message(message):
     emit_chat_log()
     
 def bot_about():
-    return "Hi guys! My name is chit-chat-bot and I'm here to help! Type !! help to learn more."
+    return "Hi guys! My name is chit-chat-bot and I'm here to help! Type '!! help' to learn more :o"
     
 def bot_help():
-    help_message = "Commands:\n"
+    help_message = "Here are a list of commands you can ask me: "
     
     for command in bot_commands:
-        help_message += command + "\n"
+        help_message += "'" + command + "'"
     
     return help_message
     
+# requests funtranslate to translate to morse code
 def bot_translate(string):
     url = 'https://api.funtranslations.com/translate/morse.json'
     paramaters = {"text":string}
@@ -215,9 +222,8 @@ def bot_translate(string):
 
     return translated_text
 
-# returns random top track using spotify api
-def bot_spotify(artist):
-    # set up auth, gets access token to make requests
+# set up auth, gets access token to make requests
+def spotify_get_access_token():
     auth_url = 'https://accounts.spotify.com/api/token'
     auth_body_params = {
         'grant_type':'client_credentials',
@@ -228,17 +234,18 @@ def bot_spotify(artist):
     auth_data = auth_response.json()
     
     access_token = auth_data['access_token']
-    header = {
-        'Authorization': 'Bearer {token}'.format(token=access_token)
-    }
+    return access_token
+
+# returns a spotify top track
+def bot_spotify(artist):
+    
+    access_token = spotify_get_access_token()
+    
+    header = { 'Authorization': 'Bearer {token}'.format(token=access_token) }
     
     # search for artist to get id
     search_url = 'https://api.spotify.com/v1/search'
-    search_body_params = {
-        'q':artist,
-        'type':'artist',
-        'limit':1,
-    }
+    search_body_params = { 'q':artist, 'type':'artist', 'limit':1 }
     search_response = requests.get(search_url, headers=header, params=search_body_params)
     
     # if error
@@ -246,7 +253,6 @@ def bot_spotify(artist):
         return "Sorry! Connection error :-("
     
     search_data = search_response.json()
-    print(search_data)
     
     # if no artist was found
     if (search_data['artists']['total'] == 0):
@@ -265,18 +271,19 @@ def bot_spotify(artist):
     if search_response.status_code != 200:
         return "Sorry! Connection error :-("
     
-    # gets track data and randomly picks song from there
+    # gets track data and randomly picks song
     tracks_data = tracks_response.json()
     rand = random.randint(0, len(tracks_data['tracks']) - 1)
     
     track_title = tracks_data['tracks'][rand]['name']
     
-    return "You should listen to the song " + track_title + " by " + artist_name + "!! It's one of my favorites :D"
+    bot_response = "You should listen to the song " + track_title + " by " + artist_name + "!! It's one of my favorites :D"
+    return bot_response
     
 def bot_unknown(command):
-    return "( !!  " + command + " ) Command unknown. Type !! help for a list of commands."
+    return "( !!  " + command + " ) Command unknown. Type '!! help' for a list of commands :p"
     
-# on connect: update active users
+# on connect: update active users and emit chat
 @socketio.on('connect')
 def on_connect():
     print('Someone connected!')

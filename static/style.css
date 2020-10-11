@@ -59,12 +59,15 @@ ul {
     list-style:none;
     padding:0px;
     margin:15px 25px;
+    width:70%;
+    
 }
 
 li {
     margin-top:10px;
     border-radius:5px;
     padding:5px;
+    
 }
 
 .user {
@@ -73,6 +76,8 @@ li {
 
 .bot {
     background-color:#ffdef1;
+    font-family:Courier;
+    
 }
 
 .userid {
