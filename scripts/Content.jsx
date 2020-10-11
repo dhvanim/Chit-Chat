@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Socket } from './Socket';
 import { Users } from './Users';
-/*import { ChatBox } from './ChatBox';*/
+import { ChatBox } from './ChatBox';
 
 export function Content() {
     
@@ -26,10 +26,9 @@ export function Content() {
             </div>
             
             <div id="chatbox">
-            <p> beginning of chit chat </p>
             
-
-
+                <ChatBox />
+            
             </div>
             
             <div class="form">

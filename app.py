@@ -87,8 +87,19 @@ def update_users_active(update):
     
     socketio.emit('active users channel', {'users':users_active})
 
+# global dict w user's and last timestamp
+lastEmittedTimeStamp = {}
+def get_lastEmittedTimeStamp():
+    global lastEmittedTimeStamp
+    user = str(flask.request.sid)
+    
+    if user not in lastEmittedTimeStamp:
+        lastEmittedTimeStamp[user] = 0
+    
+    print(lastEmittedTimeStamp)
+    return lastEmittedTimeStamp[user]
+    
 # returns chat log after given timestamp
-lastEmittedTimeStamp = 0
 def get_chat_log(timestamp):
     global lastEmittedTimeStamp
     output = []
@@ -107,17 +118,14 @@ def get_chat_log(timestamp):
     
     # updates last emitted timestamp
     if len(output) != 0:
-        lastEmittedTimeStamp = output[-1]['timestamp']
-    
-    print("got chat log and lastEmittedTimeStamp")
-    print(output, lastEmittedTimeStamp)
+        user = flask.request.sid
+        lastEmittedTimeStamp[user] = output[-1]['timestamp']
     
     return output
 
 # emits chat log, does not if empty
 def emit_chat_log():
-    global lastEmittedTimeStamp
-    chat_log = get_chat_log(lastEmittedTimeStamp)
+    chat_log = get_chat_log(get_lastEmittedTimeStamp())
     
     if len(chat_log) == 0:
         return

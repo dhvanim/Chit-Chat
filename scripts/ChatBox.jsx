@@ -1,6 +1,10 @@
 import * as React from 'react';
 import { Socket } from './Socket';
 
+/* TODO: 
+fix: when new page opens, all pages get full chat history again. 
+update: style.css for chat
+*/
 
 export function ChatBox() {
     
@@ -14,7 +18,6 @@ export function ChatBox() {
                 Socket.off('chat log channel', updateMessages);
             };
         });
-
     }
     
     function updateMessages(data) {
@@ -24,12 +27,12 @@ export function ChatBox() {
         
         chatlog.map( (item) => {
             console.log(item);
-            
+            setmessages( messages => messages.concat(item));
         });
         
         console.log("End of recieved messaes.");
         
-        setmessages( messages => messages.concat( data['chatlog'] ));
+        
         
         console.log("updated log: ", messages);
     }
@@ -45,8 +48,7 @@ export function ChatBox() {
                     {message.timestamp}
                     </li>
                 )}
-            
-            </ul>
+        </ul>
         
     );
 }
