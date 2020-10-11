@@ -3,3 +3,4 @@ node_modules/
 static/script.js
 package-lock.json
 sql.env
+spotify.env

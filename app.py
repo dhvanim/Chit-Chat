@@ -7,6 +7,7 @@ import flask_socketio
 from flask_socketio import join_room, leave_room
 from datetime import datetime
 import requests
+import random
 
 # set up flask app, db, and socket
 app = flask.Flask(__name__)
@@ -31,7 +32,14 @@ db = flask_sqlalchemy.SQLAlchemy(app)
 db.init_app(app)
 db.app = app
 
+# set up spotify keys
+dotenv_path = join(dirname(__file__), 'spotify.env')
+load_dotenv(dotenv_path)
 
+spotify_id = os.environ['SPOTIFY_CLIENT_ID']
+spotify_secret = os.environ['SPOTIFY_CLIENT_SECRET']
+
+### ### ### ### ### ### ###
 ''' temporary until i can fix the import issue '''
 
 # temp table - delete later
@@ -161,8 +169,13 @@ def handle_bot(message):
     elif (command == 'help'):
         reply = bot_help()
     elif (command == 'translate'):
-        translate_string = message_arr[2:len(message_arr)]
+        temp = message_arr[2:len(message_arr)]
+        translate_string = " ".join(temp)
         reply = bot_translate(translate_string)
+    elif (command == 'spotify'):
+        temp = message_arr[2:len(message_arr)]
+        artist = " ".join(temp)
+        reply = bot_spotify(artist)
     else:
         reply = bot_unknown(command)
     
@@ -202,9 +215,66 @@ def bot_translate(string):
 
     return translated_text
 
-
+# returns random top track using spotify api
+def bot_spotify(artist):
+    # set up auth, gets access token to make requests
+    auth_url = 'https://accounts.spotify.com/api/token'
+    auth_body_params = {
+        'grant_type':'client_credentials',
+        'client_id':spotify_id,
+        'client_secret':spotify_secret,
+    }
+    auth_response = requests.post(auth_url, data=auth_body_params)
+    auth_data = auth_response.json()
+    
+    access_token = auth_data['access_token']
+    header = {
+        'Authorization': 'Bearer {token}'.format(token=access_token)
+    }
+    
+    # search for artist to get id
+    search_url = 'https://api.spotify.com/v1/search'
+    search_body_params = {
+        'q':artist,
+        'type':'artist',
+        'limit':1,
+    }
+    search_response = requests.get(search_url, headers=header, params=search_body_params)
+    
+    # if error
+    if search_response.status_code != 200:
+        return "Sorry! Connection error :-("
+    
+    search_data = search_response.json()
+    print(search_data)
+    
+    # if no artist was found
+    if (search_data['artists']['total'] == 0):
+        return "Sorry! No artist found :-("
+    
+    # get artist id and name
+    artist_id = search_data['artists']['items'][0]['id']
+    artist_name = search_data['artists']['items'][0]['name']
+    
+    # search for top track
+    tracks_url = 'https://api.spotify.com/v1/artists/' + artist_id + '/top-tracks'
+    tracks_body_params = {'country':'US'}
+    tracks_response = requests.get(tracks_url, headers=header, params=tracks_body_params)
+    
+    # if error
+    if search_response.status_code != 200:
+        return "Sorry! Connection error :-("
+    
+    # gets track data and randomly picks song from there
+    tracks_data = tracks_response.json()
+    rand = random.randint(0, len(tracks_data['tracks']) - 1)
+    
+    track_title = tracks_data['tracks'][rand]['name']
+    
+    return "You should listen to the song " + track_title + " by " + artist_name + "!! It's one of my favorites :D"
+    
 def bot_unknown(command):
-    return "( " + command + " ) Command unknown. Type !! help for a list of commands."
+    return "( !!  " + command + " ) Command unknown. Type !! help for a list of commands."
     
 # on connect: update active users
 @socketio.on('connect')
