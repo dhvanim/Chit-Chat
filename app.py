@@ -6,7 +6,9 @@ import flask_sqlalchemy
 import flask_socketio
 from flask_socketio import join_room, leave_room
 from datetime import datetime
+import requests
 
+# set up flask app, db, and socket
 app = flask.Flask(__name__)
 
 app.static_folder = 'static'
@@ -77,6 +79,7 @@ class Users(db.Model):
 db.create_all()
 db.session.commit()
 
+
 # uses global variable to update active users
 users_active = 0
 def update_users_active(update):
@@ -94,7 +97,6 @@ def get_lastEmittedTimeStamp():
     if user not in lastEmittedTimeStamp:
         lastEmittedTimeStamp[user] = 0
     
-    print(lastEmittedTimeStamp)
     return lastEmittedTimeStamp[user]
     
 # returns chat log (and new timestamp) after given timestamp
@@ -129,8 +131,6 @@ def emit_chat_log():
         return
     
     socketio.emit('chat log channel', {'chat_log':chat_log, 'timestamp':timestamp})
-    print("emitted chat log")
-    print(chat_log)
 
 # recieves message from client and saves to db
 @socketio.on('message channel')
@@ -143,15 +143,12 @@ def save_message(data):
     db.session.add(ChatLog(userid, message, timestamp))
     db.session.commit()
     
-    print("got message from client")
-    print(userid, message, timestamp)
-    
     if message[0:2] == "!!":
         handle_bot(message)
     
     emit_chat_log()
     
-bot_commands = ['!! about', '!! help', "!! funtranslate"]
+bot_commands = ['!! about', '!! help', "!! translate"]
 
 def handle_bot(message):
     message_arr = message.split()
@@ -163,9 +160,9 @@ def handle_bot(message):
         reply = bot_about()
     elif (command == 'help'):
         reply = bot_help()
-    elif (command == 'funtranslate'):
+    elif (command == 'translate'):
         translate_string = message_arr[2:len(message_arr)]
-        reply = bot_funtranslate(translate_string)
+        reply = bot_translate(translate_string)
     else:
         reply = bot_unknown(command)
     
@@ -178,9 +175,6 @@ def bot_save_message(message):
     
     db.session.add(ChatLog(userid, message, timestamp))
     db.session.commit()
-    
-    print("got message from BOT")
-    print(userid, message, timestamp)
     
     emit_chat_log()
     
@@ -195,10 +189,20 @@ def bot_help():
     
     return help_message
     
-def bot_funtranslate(string):
-    # TODO
-    return "TODO"
+def bot_translate(string):
+    url = 'https://api.funtranslations.com/translate/morse.json'
+    paramaters = {"text":string}
     
+    response = requests.get(url, params=paramaters).json()
+    
+    if response['success']['total'] != 1:
+        return "Sorry! Error in translating :-("
+    
+    translated_text = response['contents']['translated']
+
+    return translated_text
+
+
 def bot_unknown(command):
     return "( " + command + " ) Command unknown. Type !! help for a list of commands."
     
