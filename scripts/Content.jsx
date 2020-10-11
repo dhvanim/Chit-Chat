@@ -2,8 +2,7 @@ import * as React from 'react';
 
 import { Socket } from './Socket';
 import { Users } from './Users';
-import { ChatBox } from './ChatBox';
-
+/*import { ChatBox } from './ChatBox';*/
 
 export function Content() {
     
@@ -15,21 +14,8 @@ export function Content() {
         
         event.preventDefault();
         mssg.value = "";
-    }
         
-    /*    
-     // get username from socket
-    const [username, setUsername] = React.useState([""]);
-    function getUsername() {
-        
-        Socket.on('get username channel', (data) => {
-            console.log("Received username from server: " + data['username']);
-            setUsername(data['username']);
-        });
-           
     }
-    
-    */
     
     return (
         <div>
@@ -39,7 +25,12 @@ export function Content() {
                 <Users />
             </div>
             
-            <ChatBox />
+            <div id="chatbox">
+            <p> beginning of chit chat </p>
+            
+
+
+            </div>
             
             <div class="form">
                 <form onSubmit={sendChat}>

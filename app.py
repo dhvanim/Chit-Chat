@@ -4,6 +4,7 @@ import os
 import flask
 import flask_sqlalchemy
 import flask_socketio
+from flask_socketio import join_room, leave_room
 from datetime import datetime
 
 app = flask.Flask(__name__)
@@ -30,6 +31,8 @@ db.app = app
 
 
 ''' temporary until i can fix the import issue '''
+
+CHAT_LOG_CHANNEL = 'chat log channel'
 
 # temp table - delete later
 class TestTable(db.Model):
@@ -83,9 +86,11 @@ def update_users_active(update):
     users_active += update
     
     socketio.emit('active users channel', {'users':users_active})
-    
-# returns chat log after timestamp
+
+# returns chat log after given timestamp
+lastEmittedTimeStamp = 0
 def get_chat_log(timestamp):
+    global lastEmittedTimeStamp
     output = []
     
     if timestamp == 0:
@@ -100,12 +105,28 @@ def get_chat_log(timestamp):
         d['timestamp'] = str(entry.timestamp)
         output.append(d)
     
+    # updates last emitted timestamp
     if len(output) != 0:
-        timestamp = output[-1]['timestamp']
+        lastEmittedTimeStamp = output[-1]['timestamp']
+    
+    print("got chat log and lastEmittedTimeStamp")
+    print(output, lastEmittedTimeStamp)
+    
+    return output
 
-    return output, timestamp
+# emits chat log, does not if empty
+def emit_chat_log():
+    global lastEmittedTimeStamp
+    chat_log = get_chat_log(lastEmittedTimeStamp)
+    
+    if len(chat_log) == 0:
+        return
+    
+    socketio.emit('chat log channel', {'chat_log':chat_log})
+    print("emitted chat log")
+    print(chat_log)
 
-# saves message sent from client in db
+# recieves message from client and saves to db
 @socketio.on('send message channel')
 def save_message(data):
     
@@ -116,8 +137,12 @@ def save_message(data):
     db.session.add(ChatLog(userid, message, timestamp))
     db.session.commit()
     
+    print("got message from client")
     print(userid, message, timestamp)
+    
+    emit_chat_log()
 
+# on connect: update active users
 @socketio.on('connect')
 def on_connect():
     print('Someone connected!')
@@ -125,13 +150,14 @@ def on_connect():
     socketio.emit('connected', {'test': 'Connected'})
     
     update_users_active(1)
+    emit_chat_log()
 
+# on disconnect: update active users
 @socketio.on('disconnect')
 def on_disconnect():
     print ('Someone disconnected!')
     
     update_users_active(-1)
-
 
 @app.route('/')
 def hello():

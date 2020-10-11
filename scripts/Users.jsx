@@ -4,15 +4,20 @@ import { Socket } from './Socket';
 
 export function Users() {
     
-    const [users, updateUsers] = React.useState([0]);
+    const [users, setUsers] = React.useState([0]);
     
     function getActiveUsers() {
-        React.useEffect(() => {
-                Socket.on('active users channel', (data) => {
-                    console.log("Received users from server: " + data['users']);
-                    updateUsers(data['users']);
-                });
-            });
+        React.useEffect( () => {
+            Socket.on('active users channel', updateActiveUsers);
+           /* return () => {
+                Socket.off('active users channel', updateActiveUsers);
+            }; */
+        });
+    }
+    
+    function updateActiveUsers(data) {
+        console.log("recieved active users from server: ", data['users']);
+        setUsers( data['users'] );
     }
     
     getActiveUsers();
@@ -21,6 +26,6 @@ export function Users() {
         
         <p> { users } Users Active </p>
         
-    )
+    );
 
 }
