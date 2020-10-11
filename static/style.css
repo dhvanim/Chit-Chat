@@ -5,10 +5,11 @@ body {
 }
 
 #content {
-    background-color:#f4c2c2;
+    background-color:#bfb8da; 
     margin:auto;
-    width:50%;
-    height: 90%;
+    width:70%;
+    height: 95%;
+    border-radius:5px;
 }
 
 h1 {
@@ -25,6 +26,7 @@ h1 {
     background-color:#fff;
     margin: 0px 10px;
     overflow-y:scroll;
+    border-radius:5px;
 }
 
 #chatbox p {
@@ -42,11 +44,13 @@ input {
 #typeinput {
     float:left;
     width:75%;
+    border-radius:5px;
 }
 
 #submit {
     float:right;
     width:20%;
+    border-radius:5px;
 }
 
 /* messages */
@@ -59,9 +63,16 @@ ul {
 
 li {
     margin-top:10px;
-    background-color:#c6e3f7;
     border-radius:5px;
-    padding:3px;
+    padding:5px;
+}
+
+.user {
+    background-color:#aad3fa;
+}
+
+.bot {
+    background-color:#ffdef1;
 }
 
 .userid {

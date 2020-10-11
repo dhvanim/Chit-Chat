@@ -100,6 +100,7 @@ def get_lastEmittedTimeStamp():
 # returns chat log (and new timestamp) after given timestamp
 def get_chat_log(timestamp):
     global lastEmittedTimeStamp
+    user = flask.request.sid
     output = []
     
     if timestamp == 0:
@@ -116,7 +117,6 @@ def get_chat_log(timestamp):
     
     # updates last emitted timestamp
     if len(output) != 0:
-        user = flask.request.sid
         lastEmittedTimeStamp[user] = output[-1]['timestamp']
     
     return output, lastEmittedTimeStamp[user]
@@ -143,11 +143,11 @@ def save_message(data):
     db.session.add(ChatLog(userid, message, timestamp))
     db.session.commit()
     
-    if message[0:2] == "!!":
-        handle_bot(message)
-    
     print("got message from client")
     print(userid, message, timestamp)
+    
+    if message[0:2] == "!!":
+        handle_bot(message)
     
     emit_chat_log()
     
@@ -200,7 +200,7 @@ def bot_funtranslate(string):
     return "TODO"
     
 def bot_unknown(command):
-    return "Command Unknown. Type <b>!! help</b> for a list of commands."
+    return "( " + command + " ) Command unknown. Type !! help for a list of commands."
     
 # on connect: update active users
 @socketio.on('connect')
