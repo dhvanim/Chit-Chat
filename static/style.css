@@ -48,3 +48,27 @@ input {
     float:right;
     width:20%;
 }
+
+/* messages */
+
+ul {
+    list-style:none;
+    padding:0px;
+    margin:15px 25px;
+}
+
+li {
+    margin-top:10px;
+    background-color:#c6e3f7;
+    border-radius:5px;
+    padding:3px;
+}
+
+.userid {
+    font-weight:bold;
+    font-size:11px;
+}
+
+.timestamp {
+    font-size:10px;
+}

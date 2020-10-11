@@ -43,9 +43,9 @@ export function ChatBox() {
         <ul>
                 { messages.map( (message,index) => 
                     <li key={index}> 
-                    {message.userid} <br />
-                    {message.message} <br />
-                    {message.timestamp}
+                    <span class="userid">{message.userid}</span> <br />
+                    <span class="message">{message.message}</span> <br />
+                    <span class="timestamp">{message.timestamp}</span>
                     </li>
                 )}
         </ul>
