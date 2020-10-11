@@ -32,8 +32,6 @@ db.app = app
 
 ''' temporary until i can fix the import issue '''
 
-CHAT_LOG_CHANNEL = 'chat log channel'
-
 # temp table - delete later
 class TestTable(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -121,16 +119,16 @@ def get_chat_log(timestamp):
         user = flask.request.sid
         lastEmittedTimeStamp[user] = output[-1]['timestamp']
     
-    return output
+    return output, lastEmittedTimeStamp[user]
 
 # emits chat log, does not if empty
 def emit_chat_log():
-    chat_log = get_chat_log(get_lastEmittedTimeStamp())
+    chat_log, timestamp = get_chat_log(get_lastEmittedTimeStamp())
     
     if len(chat_log) == 0:
         return
     
-    socketio.emit('chat log channel', {'chat_log':chat_log})
+    socketio.emit('chat log channel', {'chat_log':chat_log, 'timestamp':timestamp})
     print("emitted chat log")
     print(chat_log)
 
