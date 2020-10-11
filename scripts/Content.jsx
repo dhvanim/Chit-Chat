@@ -9,7 +9,7 @@ export function Content() {
     function sendChat(event) {
         
         let mssg = document.getElementById("typeinput");
-        Socket.emit('send message channel', {'mssg':mssg.value});
+        Socket.emit('message channel', {'mssg':mssg.value});
         console.log('message sent to server');
         
         event.preventDefault();

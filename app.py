@@ -97,7 +97,7 @@ def get_lastEmittedTimeStamp():
     print(lastEmittedTimeStamp)
     return lastEmittedTimeStamp[user]
     
-# returns chat log after given timestamp
+# returns chat log (and new timestamp) after given timestamp
 def get_chat_log(timestamp):
     global lastEmittedTimeStamp
     output = []
@@ -133,7 +133,7 @@ def emit_chat_log():
     print(chat_log)
 
 # recieves message from client and saves to db
-@socketio.on('send message channel')
+@socketio.on('message channel')
 def save_message(data):
     
     userid = flask.request.sid
@@ -143,11 +143,65 @@ def save_message(data):
     db.session.add(ChatLog(userid, message, timestamp))
     db.session.commit()
     
+    if message[0:2] == "!!":
+        handle_bot(message)
+    
     print("got message from client")
     print(userid, message, timestamp)
     
     emit_chat_log()
+    
+bot_commands = ['!! about', '!! help', "!! funtranslate"]
 
+def handle_bot(message):
+    message_arr = message.split()
+    command = message_arr[1]
+    
+    reply = ""
+    
+    if (command == 'about'):
+        reply = bot_about()
+    elif (command == 'help'):
+        reply = bot_help()
+    elif (command == 'funtranslate'):
+        translate_string = message_arr[2:len(message_arr)]
+        reply = bot_funtranslate(translate_string)
+    else:
+        reply = bot_unknown(command)
+    
+    bot_save_message(reply)
+  
+def bot_save_message(message):
+    userid = "chit-chat-bot"
+    message = message
+    timestamp = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+    
+    db.session.add(ChatLog(userid, message, timestamp))
+    db.session.commit()
+    
+    print("got message from BOT")
+    print(userid, message, timestamp)
+    
+    emit_chat_log()
+    
+def bot_about():
+    return "Hi guys! My name is chit-chat-bot and I'm here to help! Type !! help to learn more."
+    
+def bot_help():
+    help_message = "Commands:\n"
+    
+    for command in bot_commands:
+        help_message += command + "\n"
+    
+    return help_message
+    
+def bot_funtranslate(string):
+    # TODO
+    return "TODO"
+    
+def bot_unknown(command):
+    return "Command Unknown. Type <b>!! help</b> for a list of commands."
+    
 # on connect: update active users
 @socketio.on('connect')
 def on_connect():
