@@ -24,7 +24,7 @@ export function Users() {
     
     return (
         
-        <p> { users } Users Active </p>
+        <span> { users } Users Active </span>
         
     );
 

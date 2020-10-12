@@ -55,8 +55,9 @@ export function ChatBox() {
     
     function updateUsername(data) {
         console.log("Recieved username from server: ", data['userid']);
-        
-        setusername( data['userid'] );
+        if (username == "") {
+            setusername( data['userid'] );
+        }
     }
     
     
@@ -68,9 +69,9 @@ export function ChatBox() {
         <ul>
                 { messages.map( (message,index) => 
                     <li key={index} class={ message.userid == "chit-chat-bot" ? "botuser" : ( message.userid == username ? "thisuser" : "user") }> 
-                    <span class="userid">{message.userid}</span> <br />
-                    <span class="message">{message.message}</span> <br />
-                    <span class="timestamp">{message.timestamp}</span>
+                        <span class="userid">{message.userid}</span> <br />
+                        <span class="message">{message.message}</span> <br />
+                        <span class="timestamp">{message.timestamp}</span>
                     </li>
                 )}
         </ul>

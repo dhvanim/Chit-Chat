@@ -2,13 +2,17 @@ body {
     font-family: Arial;
     font-size: 13px;
     margin:20px auto;
+    background-image: url('pinkpurpleblue.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
 }
 
 #content {
-    background-color:#bfb8da; 
+    background-color:#fff;
+    border:3px solid #cccfff;
     margin:auto;
-    width:60%;
-    height: 95%;
+    width:65%;
+    height: 90%;
     border-radius:5px;
 }
 
@@ -23,8 +27,12 @@ h1 {
 
 #chatbox {
     height:70%;
+    background-image: url('pinkpurpleblue.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
     background-color:#fff;
-    margin: 0px 10px;
+    border:2px solid #cccfff;
+    margin: 10px 10px;
     overflow-y:scroll;
     border-radius:5px;
 }
@@ -34,7 +42,7 @@ h1 {
 }
 
 .form {
-    margin:20px;
+    margin:10px;
 }
 
 input {
@@ -66,21 +74,34 @@ li {
     margin-top:10px;
     border-radius:5px;
     padding:5px;
-    width:auto;
+    width:60%;
+    overflow-wrap: break-word;
 }
 
 .thisuser {
-    background-color:#999;
+    background-color:rgba(255,255,255,.5);
+    border:3px solid rgba(255,255,255,.5);
     text-align:right;
+    float:right;
+    margin-bottom:10px;
 }
 
 .user {
-    background-color:#aad3fa;
+    background-color:rgba(255,255,255,.5);
+    border:3px solid rgba(255,255,255,.5);
+    clear:both;
+    
 }
 
 .botuser {
-    background-color:#ffdef1;
+    background-color:rgba(204, 207, 255,.5);
+    border:3px solid rgba(204, 207, 255,.5);
     font-family:Courier;
+    clear:both;
+}
+
+.botuser .userid {
+    background-color:rgba(255,255,255,.5);
 }
 
 .userid {
