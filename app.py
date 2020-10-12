@@ -283,6 +283,7 @@ def bot_spotify(artist):
     bot_response = "You should listen to the song " + track_title + " by " + artist_name + "!! It's one of my favorites :D"
     return bot_response
     
+# returns time elapsed string
 def bot_time():
     global users_time
     entered = users_time[flask.request.sid]
@@ -298,21 +299,19 @@ def bot_time():
     
     bot_response = "You have been online for approximately "
     if (hrs!=0):
-        bot_response += hrs + " hours, "
+        bot_response += str(hrs) + " hours, "
     if (minutes!=0):
-        bot_response += minutes + " minutes, "
+        bot_response += str(minutes) + " minutes, "
     if (sec!=0):
-        bot_response += sec + " seconds, and "
+        bot_response += str(sec) + " seconds and "
         
-    bot_response += elapsed.microseconds + " microseconds :o"
+    bot_response += str(elapsed.microseconds) + " microseconds :o"
     
     return bot_response
     
-    
-    
-    
 def bot_unknown(command):
     return "( !!  " + command + " ) Command unknown. Type '!! help' for a list of commands :p"
+    
     
 users_time = {}
 # on connect: update active users and emit chat
