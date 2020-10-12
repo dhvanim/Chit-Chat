@@ -83,6 +83,10 @@ class Users(db.Model):
 db.create_all()
 db.session.commit()
 
+def send_username():
+    userid = flask.request.sid
+    
+    socketio.emit('username channel', {'userid':userid})
 
 # uses global variable to update active users
 users_active = 0
@@ -218,6 +222,7 @@ def on_connect():
     global users_time
     users_time[flask.request.sid] = datetime.now()
     update_users_active(1)
+    send_username()
     emit_chat_log()
 
 # on disconnect: update active users

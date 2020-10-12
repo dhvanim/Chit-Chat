@@ -5,6 +5,7 @@ export function ChatBox() {
     
     const [timestamp, settimestamp] = React.useState(0);
     const [messages, setmessages] = React.useState([]);
+    const [username, setusername] = React.useState("");
     
     /* turns on socket channel for chat log and calls updatemessages */
     function getNewMessages() {
@@ -43,13 +44,30 @@ export function ChatBox() {
         console.log("updated log: ", messages);
     }
     
+    function getUsername() {
+        React.useEffect( () => {
+            Socket.on('username channel', updateUsername);
+            return () => {
+                Socket.off('username channel', updateUsername);
+            };
+        });
+    }
+    
+    function updateUsername(data) {
+        console.log("Recieved username from server: ", data['userid']);
+        
+        setusername( data['userid'] );
+    }
+    
+    
     getNewMessages();
+    getUsername();
 
     /* loops through messages and displays in ul */
     return (
         <ul>
                 { messages.map( (message,index) => 
-                    <li key={index} class={message.userid == "chit-chat-bot" ? "bot" : "user"}> 
+                    <li key={index} class={ message.userid == "chit-chat-bot" ? "botuser" : ( message.userid == username ? "thisuser" : "user") }> 
                     <span class="userid">{message.userid}</span> <br />
                     <span class="message">{message.message}</span> <br />
                     <span class="timestamp">{message.timestamp}</span>

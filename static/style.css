@@ -7,7 +7,7 @@ body {
 #content {
     background-color:#bfb8da; 
     margin:auto;
-    width:70%;
+    width:60%;
     height: 95%;
     border-radius:5px;
 }
@@ -58,26 +58,29 @@ input {
 ul {
     list-style:none;
     padding:0px;
-    margin:15px 25px;
-    width:70%;
-    
+    margin:15px auto;
+    width:90%;
 }
 
 li {
     margin-top:10px;
     border-radius:5px;
     padding:5px;
-    
+    width:auto;
+}
+
+.thisuser {
+    background-color:#999;
+    text-align:right;
 }
 
 .user {
     background-color:#aad3fa;
 }
 
-.bot {
+.botuser {
     background-color:#ffdef1;
     font-family:Courier;
-    
 }
 
 .userid {
