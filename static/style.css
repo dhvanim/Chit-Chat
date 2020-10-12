@@ -5,60 +5,60 @@ body {
     background-image: url('pinkpurpleblue.jpg');
     background-size: cover;
     background-repeat: no-repeat;
+    background-color: #dfb2f7;
+    color:#fff;
 }
 
 #content {
-    background-color:#fff;
-    border:3px solid #cccfff;
     margin:auto;
     width:65%;
-    height: 90%;
-    border-radius:5px;
+    height: 95%;
+    border-radius:10px;
+    border:1px solid #fff;
+    background-color:rgba(255,255,255,.3);
 }
 
-h1 {
-    text-align:center;
-}
+/* header */
 
 .header {
-    padding:1px;
     text-align:center;
+    color:#fff;
+    margin: 10px 10px;
+    border-radius:5px;
+    background-color:#504361;
+    border:1.5px solid #352a3d;
 }
+
+.header p {
+    font-size:9px;
+}
+
+/* chat box */
 
 #chatbox {
     height:70%;
-    background-image: url('pinkpurpleblue.jpg');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-color:#fff;
-    border:2px solid #cccfff;
+    background-color:#504361;
+    border:1.5px solid #352a3d;
     margin: 10px 10px;
     overflow-y:scroll;
     border-radius:5px;
 }
 
-#chatbox p {
-    padding:10px;
+/* scrollbar */
+
+::-webkit-scrollbar {
+  width: 10px;
 }
 
-.form {
-    margin:10px;
-}
 
-input {
-    padding:5px;
+::-webkit-scrollbar-track {
+  background: rgba(231, 204, 255,.5); 
 }
+ 
 
-#typeinput {
-    float:left;
-    width:75%;
-    border-radius:5px;
-}
-
-#submit {
-    float:right;
-    width:20%;
-    border-radius:5px;
+::-webkit-scrollbar-thumb {
+  background: #352a3d; 
+  border-radius:7px;
 }
 
 /* messages */
@@ -78,30 +78,24 @@ li {
     overflow-wrap: break-word;
 }
 
+.user, .botuser {
+    clear:both;
+}
+
+.user, .thisuser {
+    background-color:rgba(204, 120, 193,.7);
+    border:3px solid rgba(255, 204, 249,.5);
+}
+
 .thisuser {
-    background-color:rgba(255,255,255,.5);
-    border:3px solid rgba(255,255,255,.5);
     text-align:right;
     float:right;
     margin-bottom:10px;
 }
 
-.user {
-    background-color:rgba(255,255,255,.5);
-    border:3px solid rgba(255,255,255,.5);
-    clear:both;
-    
-}
-
 .botuser {
-    background-color:rgba(204, 207, 255,.5);
+    background-color:rgba(120, 147, 204,.7);
     border:3px solid rgba(204, 207, 255,.5);
-    font-family:Courier;
-    clear:both;
-}
-
-.botuser .userid {
-    background-color:rgba(255,255,255,.5);
 }
 
 .userid {
@@ -109,6 +103,38 @@ li {
     font-size:11px;
 }
 
+.botuser .userid {
+    background-color:rgba(255,255,255,.2);
+}
+
 .timestamp {
-    font-size:10px;
+    font-size:9px;
+}
+
+/* form */
+
+.form {
+    margin:10px;
+}
+
+input {
+    padding:5px;
+}
+
+#typeinput {
+    float:left;
+    width:75%;
+}
+
+#submit {
+    float:right;
+    width:20%;
+    cursor: pointer;
+    background-color:#504361;
+    color:#fff;
+}
+
+#typeinput, #submit {
+    border-radius:5px;
+    border:1.5px solid #352a3d;
 }

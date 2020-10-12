@@ -21,7 +21,7 @@ export function Content() {
         <div>
 
             <div class="header">
-                <h1> chat room tehe </h1>
+                <h2> Chat Room </h2>
                 <Users />
             </div>
             
