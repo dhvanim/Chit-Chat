@@ -1,80 +1,105 @@
-# Lecture 8 - React
+# Chat Room #
 
-Let's get React up and running with Flask. If you try to run the python file, 
-we will get a blank page in our browser preview. We want the browser to 
-display **Hello World from React!!!**. In order to do that, we need to install
-some libraries to get our client-side code up and running!
+## 0. Clone this repo and cd into it
+```$ git clone https://github.com/NJIT-CS490/project2-m1-dmm77```
+<br />
 
-## 0. Clone this repo
-```$ git clone https://github.com/Sresht/lect8-react```
 
-## 1. Upgrade Node version to 7
+## 1. Create a Spotify Developer's account and get your client codes.
+1. Navigate to https://developer.spotify.com/dashboard/login and sign up or login <br />
+2. Go to your dashboard and create a project (any appropriate title/description is fine) <br />
+3. Click on the project to see your Client ID and Client Secret <br />
+4. Under your main directory create a file called `spotify.env` and populate it as follows:
+```
+SPOTIFY_CLIENT_ID={your client id here}
+SPOTIFY_CLIENT_SECRET={your client secret here}
+```
+*\*note the lack of quotes*
+<br />
 
-```$ nvm install 7```
 
-## 2. Install initial `npm` dependencies from `package.json`
+## 2. Install required dependencies, packages, etc <br />
+``` $ nvm install 7 ``` <br />
+``` $ npm install ```  <br />
+``` $ npm install -g webpack ```  <br />
+``` $ npm install --save-dev webpack ```  <br />
+``` $ npm install socket.io-client --save ```  <br />
+``` $ pip install flask-socketio ```  <br />
+``` $ pip install eventlet ``` 
+<br  />
 
-This command runs `npm`, which looks inside our `package.json` file, 
-retrieves a list of packages, and installs them to the `node_modules` folder
-inside your repository. `node_modules` folder **does not** need to be pushed
-to Heroku or GitHub.
+*\*If you see any error messages, try using `sudo pip` or `sudo npm`. If 'pip cannot be found' run `which pip` and use `sudo [path from which pip]`*
+<br />
 
-```$ npm install```
+*\*If install webpack does not work, restart your terminal; and if it still doesn't work run: `$ npm install -g yarn` and `$ yarn upgrade`, and restart your terminal* 
+<br />
 
-## 3. Add files to your .gitignore
 
-```$ touch .gitignore; echo "node_modules/" >> .gitignore; ```
-```$ echo "static/script.js" >> .gitignore```
-```$ echo "package-lock.json" >> .gitignore```
+## 3. Set up PSQL
+1. Update and install the following:  <br />
+``` $ sudo yum update ```  <br />
+``` $ sudo pip install upgrade pip ```  <br />
+``` $ sudo pip install psycopg2-binary ```  <br />
+``` $ sudo pip install Flask-SQLAlchemy==2.1 ```  <br />
+``` $ sudo yum install postgresql postgresql-server postgresql-devel postgresql-contrib postgresql-docs ```  <br />
+*\*enter yes to all prompts* 
 
-## 4. Install Webpack
+2. Initialize PSQL database <br />
+``` sudo service postgresql initdb ``` 
 
-This command installs Webpack on your Cloud9 workspace.
+3. Create a new superuser <br />
+``` sudo -u postgres createuser --superuser $USER ```  <br />
+*\*If it says "could not change directory", that's fine and it worked!* 
 
-**Note: This command MUST be run from the folder that contains package.json!**
-**You will get an error if you are in a different folder!**
+4. Make a new database <br />
+```sudo -u postgres createdb $USER ```  <br />
+*\*If it says "could not change directory", that's fine and it worked!* 
 
-```$ npm install --save-dev webpack ```
+5. In PSQL <br />
+a.) Enter PSQL `psql` <br />
+b.) Enter `\du` and `\l` and make sure your user shows up <br />
+c.) Make a new user
+``` create user [your username here] superuser password '[your password here]' ```  <br />
+*\*Repeat step b to make sure your user appears.* <br />
+d.) Quit PSQL ` \q ` 
 
-If this doesn't work. close and restart your terminal. 
-If it still doesn't work, run `$ npm install -g yarn` and `$ yarn upgrade`
+6. Under your main directory, create a file called `sql.env` and populate as follows
+```
+SQL_USER={your user here} 
+SQL_PASSWORD={your password here}
+```
+*\*note the lack of quotes*
+<br />
 
-## 5. Compile Javascript using Webpack
 
-This line starts up Webpack, which looks inside `webpack.config.js`, loads
-configuration options, and starts transpiling your JS code into 
-`static/script.js`. You may be asked to also install webpack-cli. Type **yes**.
+## 4. Enable read/write from SQLAlchemy
+*There is a file you need to enable your db admin password to work* <br />
+1. Run this command to open the file in vim `sudo vim /var/lib/pgsql9/data/pg_hba.conf` <br />
+*\*If that doesn't work try this:* `sudo vim $(psql -c "show hba_file;" | grep pg_hba.conf)` 
 
-```$ npm run watch```
+2. Replace all values of `ident` with `md5` using this command: `:%s/ident/md5/g`; quit vim `:wq`
 
-(The program should not stop running. Leave it running.)
+3. Run the following `sudo service postgresql restart`
+<br />
 
-If this step fails for whatever reason, please close your terminal and restart it,
-and re-run the command.
+## 5. Create a .gitignore file under your main directory
+Run these commands to create it and add the following files to it. This is if you plan on publically deploying your app to keep your files secure.
+``` $ touch .gitignore ```  <br />
+``` $ echo "node_modules/" >> .gitignore ```  <br />
+``` $ echo "static/script.js" >> .gitignore ```  <br />
+``` $ echo "package-lock.json" >> .gitignore ``` <br />
+``` $ echo "spotify.env" >> .gitignore ```  <br />
+``` $ echo "sql.env" >> .gitignore```  <br />
 
-## 6. Run the web app
+## 6. Run your app!!
+1. Run this command and leave it running in your terminal <br />
+```$ npm run watch```  <br />
+*\*If asked to install webpack-cli, say yes*
 
-Open a new terminal in your AWS Cloud9 environment (click the little green + 
-button near your current terminal and choose 'New Terminal'). Run `app.py` 
-(from the same folder, but new terminal), then preview the running application,
-and verify that the React renders. You should see "Hello World from React!" in
-the preview.
+2. In a new terminal, start PSQL <br />
+``` sudo service postgresql start ```  
 
-**Do not manually edit `static/script.js`! It will update when you make changes.**
-**You do need to push this file to Heroku and GitHub, which is why we put it in**
-**our .gitignore files**
+3. Finally, start your app! <br />
+``` python main.py ```  <br />
 
-## 7. Edit HTML
-
-Find the text that says "Hello World from React!" Make a change. Your webpack 
-should still be running in the other terminal (and some logs will spit out). 
-Try previewing the changes in the Preview Window in AWS. Notice that nothing 
-is updating. You need to click 'Pop out to New Window', and hard refresh the
-browser (see command below). 
-
-PS This is a known problem for a bunch of people. Unfortunately, there is no 
-known fix besides turning off the cache option for the whole browser (which 
-we don't want to do).
-
-**You will always need to do a hard refresh (Ctrl+R/Cmd+Shift+R) of an external**
-**tab in your browser (while Webpack is running) to see changes**
+*\*If you make changes to your code, you will need to do a hard refresh (Ctrl+Shift+R) to see the changes*
