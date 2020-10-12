@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { Socket } from './Socket';
 
+
+
 export function ChatBox() {
     
     const [timestamp, settimestamp] = React.useState(0);
@@ -63,6 +65,18 @@ export function ChatBox() {
     
     getNewMessages();
     getUsername();
+    
+    /* scroll bar */
+    
+    const messagesEndRef = React.useRef(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
+    }
+
+    React.useEffect(scrollToBottom, [messages]);
+    
+    
 
     /* loops through messages and displays in ul */
     return (
@@ -74,6 +88,8 @@ export function ChatBox() {
                         <span class="timestamp">{message.timestamp}</span>
                     </li>
                 )}
+                
+                <div ref={messagesEndRef}></div>
         </ul>
         
     );

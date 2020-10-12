@@ -26,19 +26,19 @@ body {
     margin: 10px 10px;
     border-radius:5px;
     background-color:#504361;
-    border:1.5px solid #352a3d;
+    border:1.5px solid #fff;
 }
 
 .header p {
     font-size:9px;
 }
 
-/* chat box */
+/* chat box 352a3d */
 
 #chatbox {
     height:70%;
     background-color:#504361;
-    border:1.5px solid #352a3d;
+    border:1.5px solid #fff;
     margin: 10px 10px;
     overflow-y:scroll;
     border-radius:5px;
@@ -103,10 +103,6 @@ li {
     font-size:11px;
 }
 
-.botuser .userid {
-    background-color:rgba(255,255,255,.2);
-}
-
 .timestamp {
     font-size:9px;
 }
@@ -136,5 +132,5 @@ input {
 
 #typeinput, #submit {
     border-radius:5px;
-    border:1.5px solid #352a3d;
+    border:1.5px solid #fff;
 }
