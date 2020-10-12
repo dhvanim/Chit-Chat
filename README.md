@@ -43,21 +43,17 @@ SPOTIFY_CLIENT_SECRET={your client secret here}
 ``` $ sudo pip install Flask-SQLAlchemy==2.1 ```  <br />
 ``` $ sudo yum install postgresql postgresql-server postgresql-devel postgresql-contrib postgresql-docs ```  <br />
 *\*enter yes to all prompts* 
- <br />
 
 2. Initialize PSQL database <br />
 ``` sudo service postgresql initdb ``` 
-<br />
 
 3. Create a new superuser <br />
 ``` sudo -u postgres createuser --superuser $USER ```  <br />
 *\*If it says "could not change directory", that's fine and it worked!* 
-<br />
 
 4. Make a new database <br />
 ```sudo -u postgres createdb $USER ```  <br />
 *\*If it says "could not change directory", that's fine and it worked!* 
-<br />
 
 5. In PSQL <br />
 a.) Enter PSQL `psql` <br />
@@ -66,7 +62,6 @@ c.) Make a new user
 ``` create user [your username here] superuser password '[your password here]' ```  <br />
 *\*Repeat step b to make sure your user appears.* <br />
 d.) Quit PSQL ` \q ` 
-<br />
 
 6. Under your main directory, create a file called `sql.env` and populate as follows
 ```
@@ -81,14 +76,11 @@ SQL_PASSWORD={your password here}
 *There is a file you need to enable your db admin password to work* <br />
 1. Run this command to open the file in vim `sudo vim /var/lib/pgsql9/data/pg_hba.conf` <br />
 *\*If that doesn't work try this:* `sudo vim $(psql -c "show hba_file;" | grep pg_hba.conf)` 
-<br />
 
 2. Replace all values of `ident` with `md5` using this command: `:%s/ident/md5/g`; quit vim `:wq`
-<br />
 
 3. Run the following `sudo service postgresql restart`
 <br />
-
 
 ## 5. Create a .gitignore file under your main directory
 Run these commands to create it and add the following files to it. This is if you plan on publically deploying your app to keep your files secure.
@@ -98,14 +90,11 @@ Run these commands to create it and add the following files to it. This is if yo
 ``` $ echo "package-lock.json" >> .gitignore ``` <br />
 ``` $ echo "spotify.env" >> .gitignore ```  <br />
 ``` $ echo "sql.env" >> .gitignore```  <br />
-<br />
-
 
 ## 6. Run your app!!
 1. Run this command and leave it running in your terminal <br />
 ```$ npm run watch```  <br />
 *\*If asked to install webpack-cli, say yes*
-<br />
 
 2. In a new terminal, start PSQL <br />
 ``` sudo service postgresql start ```  
