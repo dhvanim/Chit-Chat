@@ -156,7 +156,7 @@ def save_message(data):
     
     emit_chat_log()
     
-bot_commands = ['!! about', '!! help', "!! translate"]
+bot_commands = ['!! about', '!! help', '!! translate', '!! spotify', '!! time']
 
 # reads command and calls appropriate function to execute, saves message
 def handle_bot(message):
@@ -181,6 +181,9 @@ def handle_bot(message):
         artist = " ".join(temp)
         reply = bot_spotify(artist)
         
+    elif (command == 'time'):
+        reply = bot_time()
+        
     else:
         reply = bot_unknown(command)
     
@@ -198,13 +201,13 @@ def bot_save_message(message):
     emit_chat_log()
     
 def bot_about():
-    return "Hi guys! My name is chit-chat-bot and I'm here to help! Type '!! help' to learn more :o"
+    return "Hi guys! My name is chit-chat-bot and I'm here to help! Type '!! help' to learn more :-))"
     
 def bot_help():
-    help_message = "Here are a list of commands you can ask me: "
+    help_message = "Here are a list of commands you can ask me: \n"
     
     for command in bot_commands:
-        help_message += "'" + command + "'"
+        help_message += "\t" + command + "\t"
     
     return help_message
     
@@ -280,16 +283,46 @@ def bot_spotify(artist):
     bot_response = "You should listen to the song " + track_title + " by " + artist_name + "!! It's one of my favorites :D"
     return bot_response
     
+def bot_time():
+    global users_time
+    entered = users_time[flask.request.sid]
+    current = datetime.now()
+    
+    elapsed = current - entered
+    elapsed_sec = elapsed.total_seconds()
+    
+    # convert to hrs/min/sec
+    hrs = int ( elapsed_sec // 3600 )
+    minutes = int( ( elapsed_sec - (hrs*3600) ) // 60 )
+    sec = int ( elapsed_sec - (hrs*3600) - (minutes*60) )
+    
+    bot_response = "You have been online for approximately "
+    if (hrs!=0):
+        bot_response += hrs + " hours, "
+    if (minutes!=0):
+        bot_response += minutes + " minutes, "
+    if (sec!=0):
+        bot_response += sec + " seconds, and "
+        
+    bot_response += elapsed.microseconds + " microseconds :o"
+    
+    return bot_response
+    
+    
+    
+    
 def bot_unknown(command):
     return "( !!  " + command + " ) Command unknown. Type '!! help' for a list of commands :p"
     
+users_time = {}
 # on connect: update active users and emit chat
 @socketio.on('connect')
 def on_connect():
     print('Someone connected!')
     
     socketio.emit('connected', {'test': 'Connected'})
-    
+    global users_time
+    users_time[flask.request.sid] = datetime.now()
     update_users_active(1)
     emit_chat_log()
 
