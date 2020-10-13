@@ -83,8 +83,11 @@ class Users(db.Model):
 db.create_all()
 db.session.commit()
 
+def get_username():
+    return flask.request.sid
+
 def send_username():
-    userid = flask.request.sid
+    userid = get_username()
     
     socketio.emit('username channel', {'userid':userid})
 
@@ -100,7 +103,7 @@ def update_users_active(update):
 lastEmittedTimeStamp = {}
 def get_lastEmittedTimeStamp():
     global lastEmittedTimeStamp
-    user = str(flask.request.sid)
+    user = str(get_username())
     
     if user not in lastEmittedTimeStamp:
         lastEmittedTimeStamp[user] = 0
@@ -110,7 +113,7 @@ def get_lastEmittedTimeStamp():
 # returns chat log (and new timestamp) after given timestamp
 def get_chat_log(timestamp):
     global lastEmittedTimeStamp
-    user = flask.request.sid
+    user = get_username()
     output = []
     
     if timestamp == 0:
@@ -137,16 +140,16 @@ def emit_chat_log():
     
     if len(chat_log) == 0:
         return
-    
+    print("emitted  ", len(chat_log))
     socketio.emit('chat log channel', {'chat_log':chat_log, 'timestamp':timestamp})
 
 # recieves message from client and saves to db, emits chat
 @socketio.on('message channel')
 def save_message(data):
     
-    userid = flask.request.sid
+    userid = get_username()
     message = data['mssg']
-    timestamp = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+    timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
     
     db.session.add(ChatLog(userid, message, timestamp))
     db.session.commit()
@@ -156,7 +159,6 @@ def save_message(data):
     
     emit_chat_log()
     
-
 # reads command and calls appropriate function to execute, saves message
 def handle_bot(message):
     global users_time
@@ -189,7 +191,7 @@ def handle_bot(message):
         reply = bot.bot_spotify(artist)
         
     elif (command == 'time'):
-        reply = bot.bot_time( users_time[flask.request.sid] )
+        reply = bot.bot_time( users_time[get_username()] )
         
     else:
         reply = bot.bot_unknown(command)
@@ -200,27 +202,34 @@ def handle_bot(message):
 def bot_save_message(message):
     userid = "chit-chat-bot"
     message = message
-    timestamp = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+    timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
     
     db.session.add(ChatLog(userid, message, timestamp))
     db.session.commit()
     
     emit_chat_log()
     
+# emits message if user joined
+def user_joined(userid):
+    message = str(userid) + " has joined the chat."
     
-
-
-    
+    socketio.emit('chat log channel', {'chat_log':[ {'userid':"",'message':message,'timestamp':""} ], 'timestamp':""})
     
 users_time = {}
-# on connect: update active users and emit chat
+# on connect: update active users, emit chat, send username, and save current time
 @socketio.on('connect')
 def on_connect():
     print('Someone connected!')
     
     socketio.emit('connected', {'test': 'Connected'})
+    
     global users_time
-    users_time[flask.request.sid] = datetime.now()
+    
+    userid = get_username()
+
+    users_time[userid] = datetime.now()
+    
+    user_joined(userid)
     update_users_active(1)
     send_username()
     emit_chat_log()

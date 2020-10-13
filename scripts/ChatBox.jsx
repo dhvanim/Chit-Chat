@@ -21,12 +21,20 @@ export function ChatBox() {
     
     /* updates chat log */
     function updateMessages(data) {
-        console.log("Recieved messages from server: ");
+        console.log("Recieved " + data['chat_log'].length + " messages from server: ");
         
         let chatlog = data['chat_log'];
         let newtimestamp = data['timestamp'];
         console.log("prev ", timestamp);
         console.log("new ", newtimestamp);
+        
+        /* if user entered (not if own user) */
+        if (newtimestamp == "" && timestamp != 0) {
+            let item = chatlog[0];
+            console.log(item);
+            setmessages( messages => messages.concat(item) );
+            return null;
+        }
         
         /* only updates if the timestamp recieved is later */
         if (timestamp == newtimestamp || timestamp > newtimestamp) {
@@ -43,7 +51,7 @@ export function ChatBox() {
         settimestamp( newtimestamp );
         
         console.log("End of recieved messaes.");
-        console.log("updated log: ", messages);
+        console.log("updated log length: ", messages.length);
     }
     
     function getUsername() {
@@ -55,6 +63,7 @@ export function ChatBox() {
         });
     }
     
+    /* saves only first username recieved (its own) */
     function updateUsername(data) {
         console.log("Recieved username from server: ", data['userid']);
         if (username == "") {
@@ -62,27 +71,41 @@ export function ChatBox() {
         }
     }
     
+    /* scroll bar */
+    const messagesEndRef = React.useRef(null);
+    
+    function scroll() {
+        const scrollToBottom = () => {
+            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+        };
+
+        React.useEffect(scrollToBottom, [messages]);
+    }
     
     getNewMessages();
     getUsername();
+    scroll();
     
-    /* scroll bar */
-    
-    const messagesEndRef = React.useRef(null);
-
-    const scrollToBottom = () => {
-        messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
+    function getLIClass(id) {
+        if (id == "chit-chat-bot") {
+            return "botuser";
+        }
+        if (id == username) {
+            return "thisuser";
+        }
+        if (id == "") {
+            return "entereduser";
+        }
+        
+        return "user";
     }
-
-    React.useEffect(scrollToBottom, [messages]);
     
     
-
     /* loops through messages and displays in ul */
     return (
         <ul>
                 { messages.map( (message,index) => 
-                    <li key={index} class={ message.userid == "chit-chat-bot" ? "botuser" : ( message.userid == username ? "thisuser" : "user") }> 
+                    <li key={index} class={ getLIClass(message.userid) }> 
                         <span class="userid">{message.userid}</span> <br />
                         <span class="message">{message.message}</span> <br />
                         <span class="timestamp">{message.timestamp}</span>

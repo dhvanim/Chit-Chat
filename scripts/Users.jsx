@@ -9,9 +9,9 @@ export function Users() {
     function getActiveUsers() {
         React.useEffect( () => {
             Socket.on('active users channel', updateActiveUsers);
-           /* return () => {
+            return () => {
                 Socket.off('active users channel', updateActiveUsers);
-            }; */
+            }; 
         });
     }
     

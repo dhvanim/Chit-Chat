@@ -78,7 +78,7 @@ li {
     overflow-wrap: break-word;
 }
 
-.user, .botuser {
+.user, .botuser, .entereduser {
     clear:both;
 }
 
@@ -96,6 +96,15 @@ li {
 .botuser {
     background-color:rgba(120, 147, 204,.7);
     border:3px solid rgba(204, 207, 255,.5);
+}
+
+.entereduser {
+    background-color:#504361;
+    border:none;
+    margin:0;
+    width:100%;
+    font-style:italic;
+    text-align:center;
 }
 
 .userid {
