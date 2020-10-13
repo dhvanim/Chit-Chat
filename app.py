@@ -91,7 +91,7 @@ datamuse.generate_names()
 users_active = 0
 users_time = {} # userid:join time
 lastEmittedTimeStamp = {} # userid:lastemittedtime
-nicknames_dict = {}
+usernames_dict = {}
 
 
 # on connect
@@ -103,10 +103,10 @@ def on_connect():
     socketio.emit('connected', {'test': 'Connected'})
     
     global users_time
-    global nicknames_dict
+    global usernames_dict
     
-    userid = get_username()
-    create_nickname(userid)
+    userid = get_userid()
+    create_username(userid)
     
     print('Someone connected!', userid)
 
@@ -114,72 +114,72 @@ def on_connect():
     users_time[userid] = datetime.now() # 2
     send_username() # 3
     EMIT_CHAT_LOG() # 4
-    user_chat_status( nicknames_dict[ userid ] + " has joined the chat." ) # 5
+    user_chat_status( usernames_dict[ userid ] + " has joined the chat." ) # 5
 
 
 # on disconnect
-# (1) update active users; (2) user left mssg
+# (1) update active users; (2) user left mssg; (3) remove user from global vars
 @socketio.on('disconnect')
 def on_disconnect():
-    userid = get_username()
+    userid = get_userid()
     print ('Someone disconnected!', userid)
     
     update_users_active(-1) # 1
-    user_chat_status( nicknames_dict[ userid ] + " has left the chat." ) # 2
+    user_chat_status( usernames_dict[ userid ] + " has left the chat." ) # 2
     
-    nicknames_dict.pop(userid, None)
+    # 3
+    usernames_dict.pop(userid, None)
     lastEmittedTimeStamp.pop(userid, None)
     users_time.pop(userid, None)
     
     
-    
-# gets flask id    
-def get_username():
+# greturns flask server id    
+def get_userid():
     return flask.request.sid
 
 
-# creates username using array from datamuse
-def create_nickname(userid):
-    global nicknames_dict
+# creates and saves username using array from datamuse mod
+def create_username(userid):
+    global usernames_dict
     
-    # if all names taken will just use userid
+    # if all names taken, will just use userid
     if (len(datamuse.usernames) == 0):
-        nicknames_dict[userid] = str(userid)
+        usernames_dict[userid] = str(userid)
         return
     
     name = random.choice( datamuse.usernames )
-    nicknames_dict[userid] = name
+    usernames_dict[userid] = name
     
     datamuse.usernames.remove(name)
 
 
 # sends username to client
 def send_username():
-    global nicknames_dict
+    global usernames_dict
     
-    userid = get_username()
-    name = nicknames_dict[ userid ]
-    socketio.emit('username channel', name)
+    userid = get_userid()
+    name = usernames_dict[ userid ]
+    socketio.emit('username channel', {'username':name})
 
 
 # updates and emits # of users
 def update_users_active(update):
     global users_active
-    users_active += update
     
+    users_active += update
     socketio.emit('active users channel', {'users':users_active})
     
     
 # emits message if user joins/leaves (uses modified chat log channel)
 def user_chat_status(string):
-    data = {'userid':"",'message':string,'timestamp':""}
-    socketio.emit('chat log channel', {'chat_log':[ data ], 'timestamp':""})
+    data = {'userid':"", 'message':string, 'timestamp':""}
+    socketio.emit('chat log channel', {'chat_log': data, 'timestamp':""})
 
 
 # returns last timestamp value from global dict
 def get_lastEmittedTimeStamp():
     global lastEmittedTimeStamp
-    user = get_username()
+    user = get_userid()
     
     if user not in lastEmittedTimeStamp:
         lastEmittedTimeStamp[user] = 0
@@ -190,7 +190,7 @@ def get_lastEmittedTimeStamp():
 # queries db for messages after timestamp
 def get_chat_log(timestamp):
     global lastEmittedTimeStamp
-    user = get_username()
+    user = get_userid()
     output = []
 
     if timestamp == 0:
@@ -216,10 +216,11 @@ def get_chat_log(timestamp):
 # saves message from client in db & checks if bot command
 @socketio.on('message channel')
 def save_message(data):
-    global nicknames_dict
+    global usernames_dict
     
-    userid = get_username()
-    username = nicknames_dict[ userid ]
+    userid = get_userid()
+    username = usernames_dict[ userid ]
+    
     try:
         message = data['mssg']
     except:
@@ -241,9 +242,10 @@ def save_message(data):
 
 # sends err mssg with empty user and time
 def message_recieve_fail(userid):
-    string = "ERROR: Message from " + nicknames_dict[userid] + " failed to send."
+    string = "ERROR: Message from " + usernames_dict[userid] + " failed to send."
+    
     data = {'userid':"", 'message':string, 'timestamp':""}
-    socketio.emit('chat log channel', {'chat_log':[ data ], 'timestamp':""})
+    socketio.emit('chat log channel', {'chat_log': data, 'timestamp':""})
     
     
 # emits chat log and timestamp, if chat log not empty
@@ -294,7 +296,7 @@ def handle_bot(message):
         reply = bot.bot_spotify(artist)
         
     elif (command == 'time'):
-        reply = bot.bot_time( users_time[get_username()] )
+        reply = bot.bot_time( users_time[get_userid()] )
         
     else:
         reply = bot.bot_unknown(command)

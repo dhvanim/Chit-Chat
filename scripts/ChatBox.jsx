@@ -31,7 +31,7 @@ export function ChatBox() {
         
         /* if user entered */
         if (newtimestamp == "") {
-            let item = chatlog[0];
+            let item = chatlog;
             console.log(item);
             setmessages( messages => messages.concat(item) );
             return null;
@@ -65,9 +65,9 @@ export function ChatBox() {
     
     /* saves only first username recieved (its own) */
     function updateUsername(data) {
-        console.log("Recieved username from server: ", data);
+        console.log("Recieved username from server: ", data['username']);
         if (username == "") {
-            setusername( data );
+            setusername( data['username'] );
         }
     }
     
