@@ -26,7 +26,7 @@ body {
 }
 
 .title {
-    font-size:15px;
+    font-size:18px;
     font-weight:bold;
 }
 
@@ -83,20 +83,22 @@ li {
     clear:both;
 }
 
-.user, .thisuser {
-    background-color:rgba(204, 120, 193,.7);
-    border:3px solid rgba(255, 204, 249,.5);
+.user {
+    background-color:rgba(120, 147, 204,.8);
+    border:3px solid rgba(204, 207, 255,.5);
 }
 
 .thisuser {
     text-align:right;
     float:right;
     margin-bottom:10px;
+    background-color:rgba(204, 120, 193,.8);
+    border:3px solid rgba(255, 204, 249,.5);
 }
 
 .botuser {
-    background-color:rgba(120, 147, 204,.7);
-    border:3px solid rgba(204, 207, 255,.5);
+    background-color:rgba(245, 245, 245,.5);
+    border:3px solid rgba(245, 245, 245,.5);
 }
 
 .entereduser {
@@ -111,10 +113,12 @@ li {
 .userid {
     font-weight:bold;
     font-size:11px;
+    opacity:0.9;
 }
 
 .timestamp {
     font-size:9px;
+    opacity:0.8;
 }
 
 /* form */
