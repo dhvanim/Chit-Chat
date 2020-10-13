@@ -22,11 +22,10 @@ export function Content() {
         <div>
 
             <div class="header">
-                <h2> Chat Room </h2>
                 <Users />
             </div>
             
-            <div id="chatbox">
+            <div class="chatbox">
             
                 <ChatBox />
                 

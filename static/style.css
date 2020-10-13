@@ -1,7 +1,7 @@
 body {
     font-family: Arial;
     font-size: 13px;
-    margin:20px auto;
+    margin:40px auto;
     background-image: url('pinkpurpleblue.jpg');
     background-size: cover;
     background-repeat: no-repeat;
@@ -12,10 +12,7 @@ body {
 #content {
     margin:auto;
     width:65%;
-    height: 95%;
     border-radius:10px;
-    border:1px solid #fff;
-    background-color:rgba(255,255,255,.3);
 }
 
 /* header */
@@ -23,19 +20,23 @@ body {
 .header {
     text-align:center;
     color:#504361;
-    margin: 10px 10px;
+    margin: 15px 10px;
     border-radius:5px;
-/*    background-color:#504361;
-    border:1.5px solid #fff; */
+    text-transform:uppercase;
+}
+
+.title {
+    font-size:15px;
+    font-weight:bold;
 }
 
 .header p {
-    font-size:9px;
+    font-size:11px;
 }
 
-/* chat box 352a3d */
+/* chat box  */
 
-#chatbox {
+.chatbox {
     height:70%;
     background-color:#504361;
     border:1.5px solid #fff;
