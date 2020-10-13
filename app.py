@@ -90,7 +90,7 @@ datamuse.generate_names()
 # global variables
 users_active = 0
 users_time = {} # userid:join time
-lastEmittedTimeStamp = {} # userid:lastemittedtime
+last_emitted_timestamp = 0 # userid:lastemittedtime
 usernames_dict = {}
 
 
@@ -113,7 +113,7 @@ def on_connect():
     update_users_active(1) # 1
     users_time[userid] = datetime.now() # 2
     send_username() # 3
-    EMIT_CHAT_LOG() # 4
+    EMIT_CHAT_LOG(0) # 4
     user_chat_status( usernames_dict[ userid ] + " has joined the chat." ) # 5
 
 
@@ -129,7 +129,6 @@ def on_disconnect():
     
     # 3
     usernames_dict.pop(userid, None)
-    lastEmittedTimeStamp.pop(userid, None)
     users_time.pop(userid, None)
     
     
@@ -175,22 +174,10 @@ def user_chat_status(string):
     data = {'userid':"", 'message':string, 'timestamp':""}
     socketio.emit('chat log channel', {'chat_log': data, 'timestamp':""})
 
-
-# returns last timestamp value from global dict
-def get_lastEmittedTimeStamp():
-    global lastEmittedTimeStamp
-    user = get_userid()
-    
-    if user not in lastEmittedTimeStamp:
-        lastEmittedTimeStamp[user] = 0
-    
-    return lastEmittedTimeStamp[user]   
-    
     
 # queries db for messages after timestamp
 def get_chat_log(timestamp):
-    global lastEmittedTimeStamp
-    user = get_userid()
+    global last_emitted_timestamp
     output = []
 
     if timestamp == 0:
@@ -205,12 +192,10 @@ def get_chat_log(timestamp):
         d['timestamp'] = str(entry.timestamp)
         output.append(d)
     
-    # updates last emitted timestamp
-    if len(output) != 0:
-        for users in lastEmittedTimeStamp:
-            lastEmittedTimeStamp[users] = output[-1]['timestamp']
+    if (len(output) != 0):  # updates last emitted timestamp
+        last_emitted_timestamp = output[-1]['timestamp']
     
-    return output, lastEmittedTimeStamp[user]
+    return output
 
 
 # saves message from client in db & checks if bot command
@@ -249,15 +234,21 @@ def message_recieve_fail(userid):
     
     
 # emits chat log and timestamp, if chat log not empty
-def EMIT_CHAT_LOG():
-    global lastEmittedTimeStamp
+def EMIT_CHAT_LOG(specified_time=None):
+    global last_emitted_timestamp
+    timestamp = ""
     
-    chat_log, timestamp = get_chat_log(get_lastEmittedTimeStamp())
+    if specified_time == None:
+        timestamp = last_emitted_timestamp
+    else:
+        timestamp = specified_time
+    
+    chat_log = get_chat_log( timestamp )
     
     if len(chat_log) == 0:
         return
     
-    socketio.emit('chat log channel', {'chat_log':chat_log, 'timestamp':timestamp})
+    socketio.emit('chat log channel', {'chat_log':chat_log, 'timestamp':last_emitted_timestamp})
     
     print("emitted chat log of length", len(chat_log))
 

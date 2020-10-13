@@ -29,7 +29,7 @@ export function ChatBox() {
         console.log("Timestamp on file: ", timestamp);
         console.log("Recieved timestamp: ", newtimestamp);
         
-        /* if user entered */
+        /* user status or error message*/
         if (newtimestamp == "") {
             let item = chatlog;
             console.log(item);
