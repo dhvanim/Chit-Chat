@@ -65,9 +65,9 @@ export function ChatBox() {
     
     /* saves only first username recieved (its own) */
     function updateUsername(data) {
-        console.log("Recieved username from server: ", data['userid']);
+        console.log("Recieved username from server: ", data);
         if (username == "") {
-            setusername( data['userid'] );
+            setusername( data );
         }
     }
     
