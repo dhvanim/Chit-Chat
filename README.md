@@ -69,7 +69,6 @@ SQL_USER={your user here}
 SQL_PASSWORD={your password here}
 ```
 *\*note the lack of quotes*
-<br />
 
 
 ## 4. Enable read/write from SQLAlchemy
@@ -112,8 +111,13 @@ Run these commands to create it and add the following files to it. This is if yo
 * Information on its type of requests: https://developer.spotify.com/documentation/web-api/reference/
 
 ### Funtranslations API
-* https://funtranslations.com/api/
+* https://funtranslations.com/api/ <br />
 *\*I made requests without signing up or using an API key (and it worked for all my tested messages)
+
+### Datamuse API
+* https://www.datamuse.com/api/ <br />
+*\*I made the request without signing up or using an API key (and it worked for all my tested messages)
+
 
 
 # Problems I Encountered #
@@ -124,7 +128,7 @@ Run these commands to create it and add the following files to it. This is if yo
 5. Another issue I faced was a circular import issue in python. My main python file (app.py) imported a python file that set up my databases, and that file imported something from my app.py. Because of this, my databases simply weren't getting created and I could not access anything from the database file. A temporary solution I made was to paste the database creation code into my app.py, although it makes my code not as organized, it was a simple solution so I could work on the bulk of my application. 
 
 # Improvements #
-1. A really important improvement to my application would be implementing proper usernames picked by the user. I tried implementing a pop-up form to get this input when first opening the app, but I could not figure out the front-end details. This would visually add a lot to my application, and could provide for user data persistence (same user each time) and security (could set up a password with it). I could add this feature by researching more about React Components and how to toggle the display of certain components. Back-end wise, the user information would be stored in a database table similar to how the messages are being sent.
+1. A really important improvement to my application would be implementing proper usernames picked by the user. I tried implementing a pop-up form to get this input when first opening the app, but I could not figure out the front-end details. This would add a lot to my application and could provide for user data persistence (same user each time) and security (could set up a password with it). I could add this feature by researching more about React Components and how to toggle the display of certain components. Back-end wise, the user information would be stored in a database table similar to how the messages are being sent. My current username set up merely provides aesthetics for the user.
 2. A purely visual improvement would be better formatting of the bot responses. They are all in plain text, with no new line and tab characters or any styling to individual words within the chat. This can be resolved by looking into how to send different encoding types, files, or data via flask's socketio or a different module. Also, the messages would have to retain its styling when displaying it using React so that is important to check for too. 
 3. A really cool improvement would be implementing different chat rooms. This way multiple groups of people can retain their privacy and talk within different rooms. Flask has a way to create differnt rooms, so researching how its room funtionality works would help me create this feature. This would also cause the need for a different database build: it would have to either keep track of the room id or have a different table per room.
 4. Allowing users to send images would be a cool feature. To do this user's would either have to input the link or file of an image. If a link, there would need to be some way for the server to know it is an image file and to tell the client to embed it as such (maybe a bot command). If it was a file, there would need to be a different way of transferring data between sockets, one that allows files. The latter way requires more research into how sockets with different data. 

@@ -35,10 +35,7 @@ db.init_app(app)
 db.app = app
 
 
-
-### ### ### ### ### ### ### ### ### ### ### ### ###
-''' temporary until i can fix the import issue '''
-
+## database tables ##
 
 # chat log table with userid, message, timestamp
 class ChatLog(db.Model):
@@ -55,9 +52,7 @@ class ChatLog(db.Model):
     def __repr__(self):
         return '<ChatLog userid: %s \n message: %s \n timestamp: %s>' %(self.userid, self.message, self.timestamp)
 
-
-''' end of temp fix '''
-### ### ### ### ### ### ### ### ### ### ### ### ###
+### ### ### ### ### ### 
 
 db.create_all()
 db.session.commit()
