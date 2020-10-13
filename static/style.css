@@ -22,11 +22,11 @@ body {
 
 .header {
     text-align:center;
-    color:#fff;
+    color:#504361;
     margin: 10px 10px;
     border-radius:5px;
-    background-color:#504361;
-    border:1.5px solid #fff;
+/*    background-color:#504361;
+    border:1.5px solid #fff; */
 }
 
 .header p {

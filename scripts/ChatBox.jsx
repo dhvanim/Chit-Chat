@@ -21,12 +21,13 @@ export function ChatBox() {
     
     /* updates chat log */
     function updateMessages(data) {
-        console.log("Recieved " + data['chat_log'].length() + " messages from server: ");
         
         let chatlog = data['chat_log'];
         let newtimestamp = data['timestamp'];
-        console.log("prev ", timestamp);
-        console.log("new ", newtimestamp);
+        console.log("Recieved messages from server: ", Object.keys(chatlog).length);
+        
+        console.log("Timestamp on file: ", timestamp);
+        console.log("Recieved timestamp: ", newtimestamp);
         
         /* if user entered */
         if (newtimestamp == "") {
@@ -50,8 +51,7 @@ export function ChatBox() {
         /* updates timestamp */
         settimestamp( newtimestamp );
         
-        console.log("End of recieved messaes.");
-        console.log("updated log length: ", messages.length());
+        console.log("End of recieved messages.");
     }
     
     function getUsername() {
