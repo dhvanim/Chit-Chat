@@ -24,7 +24,7 @@ export function Users() {
     
     return (
         
-        <p> Room 1 | <span class="title">CHAT BOX</span> | { users } Users Active </p>
+        <p> Room CS-490&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;<span class="title">CHAT BOX</span>&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;{ users } Users Active </p>
         
     );
 
