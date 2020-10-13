@@ -137,7 +137,8 @@ def update_users_active(update):
     
 # emits message if user joins/leaves (uses modified chat log channel)
 def user_chat_status(string):
-    socketio.emit('chat log channel', {'chat_log':[ {'userid':"",'message':string,'timestamp':""} ], 'timestamp':""})
+    data = {'userid':"",'message':string,'timestamp':""}
+    socketio.emit('chat log channel', {'chat_log':[ data ], 'timestamp':""})
 
 
 # returns last timestamp value from global dict
@@ -182,7 +183,12 @@ def get_chat_log(timestamp):
 def save_message(data):
     
     userid = get_username()
-    message = data['mssg']
+    try:
+        message = data['mssg']
+    except:
+        print("Could not recieve message")
+        message_recieve_fail(userid)
+        
     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
     
     print("Recieved message from: ", userid)
@@ -194,6 +200,13 @@ def save_message(data):
         handle_bot(message)
     
     EMIT_CHAT_LOG()
+    
+
+# sends err mssg with empty user and time
+def message_recieve_fail(userid):
+    string = "ERROR: Message from " + str(userid) + " failed to send."
+    data = {'userid':"", 'message':string, 'timestamp':""}
+    socketio.emit('chat log channel', {'chat_log':[ data ], 'timestamp':""})
     
     
 # emits chat log and timestamp, if chat log not empty

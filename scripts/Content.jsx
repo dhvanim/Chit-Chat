@@ -11,6 +11,7 @@ export function Content() {
         
         let mssg = document.getElementById("typeinput");
         Socket.emit('message channel', {'mssg':mssg.value});
+        
         console.log('message sent to server');
         
         event.preventDefault();
