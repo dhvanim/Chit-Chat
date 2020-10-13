@@ -152,6 +152,7 @@ def get_lastEmittedTimeStamp():
 # queries db for messages after timestamp
 def get_chat_log(timestamp):
     global lastEmittedTimeStamp
+    user = get_username()
     output = []
 
     if timestamp == 0:
@@ -168,8 +169,8 @@ def get_chat_log(timestamp):
     
     # updates last emitted timestamp
     if len(output) != 0:
-        for user in lastEmittedTimeStamp:
-            lastEmittedTimeStamp[user] = output[-1]['timestamp']
+        for users in lastEmittedTimeStamp:
+            lastEmittedTimeStamp[users] = output[-1]['timestamp']
     
     return output, lastEmittedTimeStamp[user]
 

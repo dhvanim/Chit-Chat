@@ -35,10 +35,6 @@ def bot_translate(string):
     
     response = requests.get(url, params=paramaters).json()
     
-    # if api response error
-    if response.status_code != 200:     
-        return "Sorry! Connection error :-("
-    
     # if could not translate
     if response['success']['total'] != 1:   
         return "Sorry! Could not translate :-("
