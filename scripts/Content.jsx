@@ -6,6 +6,7 @@ import { ChatBox } from './ChatBox';
 
 export function Content() {
     
+    /* sends chat message to server */
     function sendChat(event) {
         
         let mssg = document.getElementById("typeinput");
@@ -28,7 +29,7 @@ export function Content() {
             <div id="chatbox">
             
                 <ChatBox />
-            
+                
             </div>
             
             <div class="form">

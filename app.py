@@ -35,7 +35,7 @@ db.app = app
 
 
 
-### ### ### ### ### ### ###
+### ### ### ### ### ### ### ### ### ### ### ### ###
 ''' temporary until i can fix the import issue '''
 
 # temp table - delete later
@@ -78,29 +78,67 @@ class Users(db.Model):
         return '<Users %s: %s>' %(self.userid, self.active)
 
 ''' end of temp fix '''
-
+### ### ### ### ### ### ### ### ### ### ### ### ###
 
 db.create_all()
 db.session.commit()
 
+# global variables
+users_active = 0
+users_time = {} # userid:join time
+lastEmittedTimeStamp = {} # userid:lastemittedtime
+
+
+# on connect
+# (1) update active users; (2) save user join time; 
+# (3) send username to client; (4) emit chat log and (5) new user mssg
+@socketio.on('connect')
+def on_connect():
+    
+    socketio.emit('connected', {'test': 'Connected'})
+    
+    global users_time
+    userid = get_username()
+    print('Someone connected!', userid)
+
+    update_users_active(1) # 1
+    users_time[userid] = datetime.now() # 2
+    send_username() # 3
+    EMIT_CHAT_LOG() # 4
+    user_joined(userid) # 5
+
+
+# on disconnect
+@socketio.on('disconnect')
+def on_disconnect():
+    print ('Someone disconnected!', get_username())
+    update_users_active(-1)
+    
+    
 def get_username():
     return flask.request.sid
 
+
 def send_username():
     userid = get_username()
-    
     socketio.emit('username channel', {'userid':userid})
 
-# uses global variable to update active users
-users_active = 0
+
 def update_users_active(update):
     global users_active
     users_active += update
     
     socketio.emit('active users channel', {'users':users_active})
+    
+    
+# emits message if user joined (uses modified chat log channel)
+def user_joined(userid):
+    message = str(userid) + " has joined the chat."
+    
+    socketio.emit('chat log channel', {'chat_log':[ {'userid':"",'message':message,'timestamp':""} ], 'timestamp':""})
 
-# global dict w user's and last timestamp
-lastEmittedTimeStamp = {}
+
+# returns last timestamp value from global dict
 def get_lastEmittedTimeStamp():
     global lastEmittedTimeStamp
     user = str(get_username())
@@ -108,14 +146,14 @@ def get_lastEmittedTimeStamp():
     if user not in lastEmittedTimeStamp:
         lastEmittedTimeStamp[user] = 0
     
-    return lastEmittedTimeStamp[user]
+    return lastEmittedTimeStamp[user]   
     
-# returns chat log (and new timestamp) after given timestamp
+    
+# queries db for messages after timestamp
 def get_chat_log(timestamp):
     global lastEmittedTimeStamp
-    user = get_username()
     output = []
-    
+
     if timestamp == 0:
         query = ChatLog.query.all()
     else:
@@ -130,20 +168,13 @@ def get_chat_log(timestamp):
     
     # updates last emitted timestamp
     if len(output) != 0:
-        lastEmittedTimeStamp[user] = output[-1]['timestamp']
+        for user in lastEmittedTimeStamp:
+            lastEmittedTimeStamp[user] = output[-1]['timestamp']
     
     return output, lastEmittedTimeStamp[user]
 
-# emits chat log and timestamp, does not if empty
-def emit_chat_log():
-    chat_log, timestamp = get_chat_log(get_lastEmittedTimeStamp())
-    
-    if len(chat_log) == 0:
-        return
-    print("emitted  ", len(chat_log))
-    socketio.emit('chat log channel', {'chat_log':chat_log, 'timestamp':timestamp})
 
-# recieves message from client and saves to db, emits chat
+# saves message from client in db & checks if bot command
 @socketio.on('message channel')
 def save_message(data):
     
@@ -151,15 +182,32 @@ def save_message(data):
     message = data['mssg']
     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
     
+    print("Recieved message from: ", userid)
+    
     db.session.add(ChatLog(userid, message, timestamp))
     db.session.commit()
     
     if message[0:2] == "!!":
         handle_bot(message)
     
-    emit_chat_log()
+    EMIT_CHAT_LOG()
     
-# reads command and calls appropriate function to execute, saves message
+    
+# emits chat log and timestamp, if chat log not empty
+def EMIT_CHAT_LOG():
+    global lastEmittedTimeStamp
+    
+    chat_log, timestamp = get_chat_log(get_lastEmittedTimeStamp())
+    
+    if len(chat_log) == 0:
+        return
+    
+    socketio.emit('chat log channel', {'chat_log':chat_log, 'timestamp':timestamp})
+    
+    print("emitted chat log of length", len(chat_log))
+
+    
+# calls appropriate function to execute and saves message
 def handle_bot(message):
     global users_time
     bot_commands = ['!! about', '!! help', '!! translate', '!! spotify', '!! time']
@@ -171,6 +219,8 @@ def handle_bot(message):
         return
     
     command = message_arr[1]
+    
+    print("recieved bot command", command)
     
     reply = ""
     
@@ -198,6 +248,7 @@ def handle_bot(message):
     
     bot_save_message(reply)
   
+  
 # saves bot message to db and emits chat
 def bot_save_message(message):
     userid = "chit-chat-bot"
@@ -207,39 +258,8 @@ def bot_save_message(message):
     db.session.add(ChatLog(userid, message, timestamp))
     db.session.commit()
     
-    emit_chat_log()
+    EMIT_CHAT_LOG()
     
-# emits message if user joined
-def user_joined(userid):
-    message = str(userid) + " has joined the chat."
-    
-    socketio.emit('chat log channel', {'chat_log':[ {'userid':"",'message':message,'timestamp':""} ], 'timestamp':""})
-    
-users_time = {}
-# on connect: update active users, emit chat, send username, and save current time
-@socketio.on('connect')
-def on_connect():
-    print('Someone connected!')
-    
-    socketio.emit('connected', {'test': 'Connected'})
-    
-    global users_time
-    
-    userid = get_username()
-
-    users_time[userid] = datetime.now()
-    
-    user_joined(userid)
-    update_users_active(1)
-    send_username()
-    emit_chat_log()
-
-# on disconnect: update active users
-@socketio.on('disconnect')
-def on_disconnect():
-    print ('Someone disconnected!')
-    
-    update_users_active(-1)
 
 @app.route('/')
 def hello():

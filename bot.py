@@ -12,9 +12,11 @@ load_dotenv(dotenv_path)
 spotify_id = os.environ['SPOTIFY_CLIENT_ID']
 spotify_secret = os.environ['SPOTIFY_CLIENT_SECRET']
 
+
 # about mssg
 def bot_about():
     return "Hi guys! My name is chit-chat-bot and I'm here to help! Type '!! help' to learn more :-))"
+
 
 # help mssg
 def bot_help(bot_commands):
@@ -25,6 +27,7 @@ def bot_help(bot_commands):
     
     return help_message
 
+
 # requests funtranslate to translate to morse code
 def bot_translate(string):
     url = 'https://api.funtranslations.com/translate/morse.json'
@@ -32,15 +35,22 @@ def bot_translate(string):
     
     response = requests.get(url, params=paramaters).json()
     
-    if response['success']['total'] != 1:
-        return "Sorry! Error in translating :-("
+    # if api response error
+    if response.status_code != 200:     
+        return "Sorry! Connection error :-("
+    
+    # if could not translate
+    if response['success']['total'] != 1:   
+        return "Sorry! Could not translate :-("
     
     translated_text = response['contents']['translated']
 
     return translated_text
 
-# set up auth, gets access token to make requests
+
+# set up spotify auth and ges access token to make requests
 def spotify_get_access_token():
+    
     auth_url = 'https://accounts.spotify.com/api/token'
     auth_body_params = {
         'grant_type':'client_credentials',
@@ -53,9 +63,10 @@ def spotify_get_access_token():
     access_token = auth_data['access_token']
     return access_token
 
+
 # returns a spotify top track
 def bot_spotify(artist):
-    
+
     access_token = spotify_get_access_token()
     
     header = { 'Authorization': 'Bearer {token}'.format(token=access_token) }
@@ -65,7 +76,7 @@ def bot_spotify(artist):
     search_body_params = { 'q':artist, 'type':'artist', 'limit':1 }
     search_response = requests.get(search_url, headers=header, params=search_body_params)
     
-    # if error
+    # if api response error
     if search_response.status_code != 200:
         return "Sorry! Connection error :-("
     
@@ -84,7 +95,7 @@ def bot_spotify(artist):
     tracks_body_params = {'country':'US'}
     tracks_response = requests.get(tracks_url, headers=header, params=tracks_body_params)
     
-    # if error
+    # if api response error
     if search_response.status_code != 200:
         return "Sorry! Connection error :-("
     
@@ -97,9 +108,9 @@ def bot_spotify(artist):
     bot_response = "You should listen to the song " + track_title + " by " + artist_name + "!! It's one of my favorites :D"
     return bot_response
     
+    
 # returns time elapsed string
 def bot_time(entered):
-    entered = entered
     current = datetime.now()
     
     elapsed = current - entered
@@ -121,6 +132,7 @@ def bot_time(entered):
     bot_response += str(elapsed.microseconds) + " microseconds :o"
     
     return bot_response
+    
     
 # unknown command
 def bot_unknown(command):
