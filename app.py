@@ -39,16 +39,6 @@ db.app = app
 ### ### ### ### ### ### ### ### ### ### ### ### ###
 ''' temporary until i can fix the import issue '''
 
-# temp table - delete later
-class TestTable(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    testmessage = db.Column(db.String(280))
-    
-    def __init__(self, m):
-        self.testmessage = m
-    
-    def __repr__(self):
-        return '<TestTable message: %s>' % self.testmessage 
 
 # chat log table with userid, message, timestamp
 class ChatLog(db.Model):
@@ -65,18 +55,6 @@ class ChatLog(db.Model):
     def __repr__(self):
         return '<ChatLog userid: %s \n message: %s \n timestamp: %s>' %(self.userid, self.message, self.timestamp)
 
-# users table with userid and status
-class Users(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    userid = db.Column(db.String(20), unique=True)
-    active = db.Column(db.Boolean())
-    
-    def __init__(self, u, a):
-        self.userid = u
-        self.active = a
-    
-    def __repr__(self):
-        return '<Users %s: %s>' %(self.userid, self.active)
 
 ''' end of temp fix '''
 ### ### ### ### ### ### ### ### ### ### ### ### ###
