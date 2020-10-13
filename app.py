@@ -105,14 +105,18 @@ def on_connect():
     users_time[userid] = datetime.now() # 2
     send_username() # 3
     EMIT_CHAT_LOG() # 4
-    user_joined(userid) # 5
+    user_chat_status( str(userid) + " has joined the chat." ) # 5
 
 
 # on disconnect
+# (1) update active users; (2) user left mssg
 @socketio.on('disconnect')
 def on_disconnect():
-    print ('Someone disconnected!', get_username())
-    update_users_active(-1)
+    userid = get_username()
+    print ('Someone disconnected!', userid)
+    
+    update_users_active(-1) # 1
+    user_chat_status( str(userid) + " has left the chat." ) # 2
     
     
 def get_username():
@@ -131,11 +135,9 @@ def update_users_active(update):
     socketio.emit('active users channel', {'users':users_active})
     
     
-# emits message if user joined (uses modified chat log channel)
-def user_joined(userid):
-    message = str(userid) + " has joined the chat."
-    
-    socketio.emit('chat log channel', {'chat_log':[ {'userid':"",'message':message,'timestamp':""} ], 'timestamp':""})
+# emits message if user joins/leaves (uses modified chat log channel)
+def user_chat_status(string):
+    socketio.emit('chat log channel', {'chat_log':[ {'userid':"",'message':string,'timestamp':""} ], 'timestamp':""})
 
 
 # returns last timestamp value from global dict
