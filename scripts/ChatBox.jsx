@@ -30,9 +30,8 @@ export function ChatBox() {
         
         /* user status or error message*/
         if (newtimestamp == "") {
-            let item = chatlog;
-            console.log(item);
-            setmessages( messages => messages.concat(item) );
+            console.log( chatlog );
+            setmessages( messages => messages.concat(chatlog) );
             return null;
         }
         
@@ -80,10 +79,8 @@ export function ChatBox() {
         React.useEffect(scrollToBottom, [messages]);
     }
     
-    getNewMessages();
-    getUsername();
-    scroll();
     
+    /* uses this class to format message (alignment/color) */
     function getLIClass(id) {
         if (id == "chit-chat-bot") {
             return "botuser";
@@ -97,31 +94,35 @@ export function ChatBox() {
         return "user";
     }
     
+    /* format based on text/images/links */
     function message_type(mssg, mssg_type) {
         if (mssg_type == "link") {
             return <span class="message"><a class="message_link" target="_blank" href={mssg}>{mssg}</a></span>;
         }
         else if (mssg_type == "image") {
-            return <span class="message"><img class ="message_image" src={mssg} /></span>;
+            return <span class="message"><img class ="message_image" src={mssg} alt="Error: Image could not be displayed"/></span>;
         }
         else {
             return <span class="message">{mssg}</span>;
         }
     }
     
+    getNewMessages();
+    getUsername();
+    scroll();
     
     /* loops through messages and displays in ul */
     return (
         <ul>
-                { messages.map( (message,index) => 
-                    <li key={index} class={ getLIClass(message.userid) }> 
-                        <span class="userid">{message.userid}</span> <br />
-                        { message_type( message.message, message.message_type ) }<br />
-                        <span class="timestamp">{message.timestamp}</span>
-                    </li>
-                )}
+            { messages.map( (message,index) => 
+                <li key={index} class={ getLIClass(message.userid) }> 
+                    <span class="userid">{message.userid}</span> <br />
+                    { message_type( message.message, message.message_type ) } <br />
+                    <span class="timestamp">{message.timestamp}</span>
+                </li>
+            )}
                 
-                <div ref={messagesEndRef}></div>
+            <div ref={messagesEndRef}></div>
         </ul>
         
     );
