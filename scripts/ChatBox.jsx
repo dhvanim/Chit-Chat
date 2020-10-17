@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Socket } from './Socket';
 
 
-
 export function ChatBox() {
     
     const [timestamp, settimestamp] = React.useState(0);
@@ -78,7 +77,6 @@ export function ChatBox() {
         const scrollToBottom = () => {
             messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
         };
-
         React.useEffect(scrollToBottom, [messages]);
     }
     
@@ -96,8 +94,19 @@ export function ChatBox() {
         if (id == "") {
             return "entereduser";
         }
-        
         return "user";
+    }
+    
+    function message_type(mssg, mssg_type) {
+        if (mssg_type == "link") {
+            return <span class="message"><a target="_blank" href={mssg}>{mssg}</a></span>;
+        }
+        else if (mssg_type == "image") {
+            return <span class="message"><img class ="message_image" href={mssg} /></span>;
+        }
+        else {
+            return <span class="message">{mssg}</span>;
+        }
     }
     
     
@@ -107,7 +116,7 @@ export function ChatBox() {
                 { messages.map( (message,index) => 
                     <li key={index} class={ getLIClass(message.userid) }> 
                         <span class="userid">{message.userid}</span> <br />
-                        <span class="message">{message.message}</span> <br />
+                        { message_type( message.message, message.message_type ) }<br />
                         <span class="timestamp">{message.timestamp}</span>
                     </li>
                 )}

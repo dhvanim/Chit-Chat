@@ -142,7 +142,7 @@ def update_users_active(update):
     
 # emits message if user joins/leaves (uses modified chat log channel)
 def user_chat_status(string):
-    data = {'userid':"", 'message':string, 'timestamp':""}
+    data = {'userid':"", 'message':string, 'timestamp':"", 'message_type':"status"}
     socketio.emit('chat log channel', {'chat_log': data, 'timestamp':""})
 
     
@@ -207,17 +207,13 @@ def handle_links(message):
         return "link"
         
     return "text"
-    
-    
-    
-    
-    
+
 
 # sends err mssg with empty user and time
 def message_recieve_fail(userid):
     string = "ERROR: Message from " + usernames_dict[userid] + " failed to send."
     
-    data = {'userid':"", 'message':string, 'timestamp':""}
+    data = {'userid':"", 'message':string, 'timestamp':"", 'message_type':"status"}
     socketio.emit('chat log channel', {'chat_log': data, 'timestamp':""})
     
     
