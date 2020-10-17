@@ -38,7 +38,7 @@ class ChatLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     userid = db.Column(db.String(280), nullable=False)
     message = db.Column(db.String(280))
-    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
     message_type = db.Column(db.String(10))
         
     def __init__(self, u, m, t, mt):

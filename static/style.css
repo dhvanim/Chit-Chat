@@ -121,6 +121,15 @@ li {
     opacity:0.8;
 }
 
+.message_image {
+    max-width: 100%;
+    margin: 5px 0px;
+}
+
+.message_link a {
+    color:#F5B1FE;
+}
+
 /* form */
 
 .form {

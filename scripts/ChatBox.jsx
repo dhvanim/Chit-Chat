@@ -99,10 +99,10 @@ export function ChatBox() {
     
     function message_type(mssg, mssg_type) {
         if (mssg_type == "link") {
-            return <span class="message"><a target="_blank" href={mssg}>{mssg}</a></span>;
+            return <span class="message"><a class="message_link" target="_blank" href={mssg}>{mssg}</a></span>;
         }
         else if (mssg_type == "image") {
-            return <span class="message"><img class ="message_image" href={mssg} /></span>;
+            return <span class="message"><img class ="message_image" src={mssg} /></span>;
         }
         else {
             return <span class="message">{mssg}</span>;
