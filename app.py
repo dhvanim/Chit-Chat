@@ -39,14 +39,16 @@ class ChatLog(db.Model):
     userid = db.Column(db.String(280), nullable=False)
     message = db.Column(db.String(280))
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    message_type = db.Column(db.String(10))
         
-    def __init__(self, u, m, t):
+    def __init__(self, u, m, t, mt):
         self.userid = u
         self.message = m
         self.timestamp = t
+        self.message_type = mt
         
     def __repr__(self):
-        return '<ChatLog userid: %s \n message: %s \n timestamp: %s>' %(self.userid, self.message, self.timestamp)
+        return '<ChatLog userid: %s \n message: %s \n timestamp: %s \n message_type %s>' %(self.userid, self.message, self.timestamp, self.message_type)
 
 ### ### ### ### ### ### 
 
@@ -159,6 +161,7 @@ def get_chat_log(timestamp):
         d['userid'] = entry.userid
         d['message'] = entry.message
         d['timestamp'] = str(entry.timestamp)
+        d['message_type'] = entry.message_type
         output.append(d)
     
     if (len(output) != 0):  # updates last emitted timestamp
@@ -183,15 +186,31 @@ def save_message(data):
         
     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
     
+    message_type = handle_links(message)
+    
     print("Recieved message from: ", userid, username)
     
-    db.session.add(ChatLog(username, message, timestamp))
+    db.session.add(ChatLog(username, message, timestamp, message_type))
     db.session.commit()
     
     if message[0:2] == "!!":
         handle_bot(message)
     
     EMIT_CHAT_LOG()
+    
+    
+# returns message type
+def handle_links(message):
+    if (message.startswith('http://')) or (message.startswith('https://')):
+        if (message.endswith('.jpg') or message.endswith('.jpeg') or message.endswith('.png') or message.endswith('.gif')):
+            return "image"
+        return "link"
+        
+    return "text"
+    
+    
+    
+    
     
 
 # sends err mssg with empty user and time
@@ -220,6 +239,7 @@ def EMIT_CHAT_LOG(specified_time=None):
     socketio.emit('chat log channel', {'chat_log':chat_log, 'timestamp':last_emitted_timestamp})
     
     print("emitted chat log of length", len(chat_log))
+    print(chat_log)
 
     
 # calls appropriate function to execute and saves message
@@ -270,7 +290,7 @@ def bot_save_message(message):
     message = message
     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
     
-    db.session.add(ChatLog(userid, message, timestamp))
+    db.session.add(ChatLog(userid, message, timestamp, "bot"))
     db.session.commit()
     
     EMIT_CHAT_LOG()
