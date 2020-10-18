@@ -42,13 +42,13 @@ class ChatLog(db.Model):
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
         
     def __init__(self, u, a, m, t):
-        self.userid = u
+        self.username = u
         self.auth = a
         self.message = m
         self.timestamp = t
         
     def __repr__(self):
-        return '<ChatLog userid: %s \n message: %s \n timestamp: %s>' %(self.userid, self.message, self.timestamp)
+        return '<ChatLog username: %s \n message: %s \n timestamp: %s>' %(self.username, self.message, self.timestamp)
 
 class ActiveUsers(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -96,13 +96,16 @@ def on_connect():
 # (1) update active users; (2) user left mssg; (3) remove user from global vars
 @socketio.on('disconnect')
 def on_disconnect():
-    serverid = get_serverid()
-    print ('Someone disconnected!', serverid)
+    this_serverid = get_serverid()
+    print ('Someone disconnected!', this_serverid)
     
     emit_users_active() # 1
-    user_chat_status( get_username() + " has left the chat." ) # 2
+    user_chat_status( get_username( this_serverid ) + " has left the chat." ) # 2
     
-    ActiveUsers.query.filter_by(ActiveUsers.serverid==serverid).delete()
+    print("on disconnect delete user info")
+    print ( ActiveUsers.query.filter_by(serverid=this_serverid) )
+    ActiveUsers.query.filter_by(serverid=this_serverid).delete()
+    print("deleted")
     
     
     
@@ -121,6 +124,7 @@ def get_google_user(data):
     db.session.commit()
     
     socketio.emit('user auth channel', {'auth':True})
+    socketio.emit('username channel', {'username':username})
     
     emit_users_active()
     user_chat_status( username + " has joined the chat." ) # 5
@@ -132,17 +136,12 @@ def get_serverid():
 
 
 # gets username from active users db
-def get_username():
-    this_serverid = get_serverid()
-    user_info = ActiveUsers.query.filter_by(serverid=this_serverid).first()
+def get_username( this_serverid ):
     
+    user_info = ActiveUsers.query.filter_by(serverid=this_serverid).first()
+    print("get username user info")
+    print(user_info)
     return user_info.username
-
-
-# sends username to client
-def send_username():
-    name = get_username()
-    socketio.emit('username channel', {'username':name})
 
 
 # updates and emits # of users
@@ -186,21 +185,22 @@ def get_chat_log(timestamp):
 # saves message from client in db & checks if bot command
 @socketio.on('message channel')
 def save_message(data):
-
-    username = get_username()
+    this_username = get_username( get_serverid() )
     
     try:
         message = data['mssg']
     except:
         print("Could not recieve message")
-        message_recieve_fail(username)
+        message_recieve_fail(this_username)
         
     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
     
-    print("Recieved message from: ", username)
+    print("Recieved message from: ", this_username)
     
-    user_info = ActiveUsers.query.filter(ActiveUsers.username == username).first()
-    db.session.add(ChatLog(username, user_info.auth, message, timestamp))
+    user_info = ActiveUsers.query.filter_by(username = this_username).first()
+    print("save message user info")
+    print(user_info)
+    db.session.add(ChatLog(this_username, user_info.auth, message, timestamp))
     db.session.commit()
     
     if message[0:2] == "!!":

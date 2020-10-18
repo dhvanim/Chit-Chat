@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Socket } from './Socket';
 
 
-
 export function ChatBox() {
     
     const [timestamp, settimestamp] = React.useState(0);
