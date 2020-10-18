@@ -87,7 +87,7 @@ def on_connect():
     serverid = get_serverid()
     
     print('Someone connected!', serverid)
-
+    emit_users_active()
     EMIT_CHAT_LOG(0) # 4
     
 
@@ -99,7 +99,7 @@ def on_disconnect():
     this_serverid = get_serverid()
     print ('Someone disconnected!', this_serverid)
     
-    update_users_active() # 1
+    emit_users_active() # 1
     user_chat_status( get_username() + " has left the chat." ) # 2
     
     ActiveUsers.query.filter_by(serverid=this_serverid).delete()
@@ -120,7 +120,9 @@ def get_google_user(data):
     db.session.add(ActiveUsers(username, auth, serverid, image, timestamp))
     db.session.commit()
     
-    update_users_active()
+    socketio.emit('user auth channel', {'auth':True})
+    
+    emit_users_active()
     user_chat_status( username + " has joined the chat." ) # 5
     
     
@@ -144,7 +146,7 @@ def send_username():
 
 
 # updates and emits # of users
-def update_users_active():
+def emit_users_active():
     data = ActiveUsers.query.all()
     
     users_active = len(data)
