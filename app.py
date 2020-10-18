@@ -36,12 +36,14 @@ db.app = app
 # chat log table with userid, message, timestamp
 class ChatLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    userid = db.Column(db.String(280), nullable=False)
+    username = db.Column(db.String(280), nullable=False)
+    auth = db.Column(db.String(20))
     message = db.Column(db.String(280))
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
         
-    def __init__(self, u, m, t):
+    def __init__(self, u, a, m, t):
         self.userid = u
+        self.auth = a
         self.message = m
         self.timestamp = t
         
@@ -51,8 +53,8 @@ class ChatLog(db.Model):
 class ActiveUsers(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(280))
-    auth = db.Column(db.String(20))
-    serverid = db.Column(db.Integer)
+    auth = db.Column(db.String(280))
+    serverid = db.Column(db.String(280))
     icon = db.Column(db.String(280))
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
     
@@ -72,57 +74,43 @@ class ActiveUsers(db.Model):
 db.create_all()
 db.session.commit()
 
-# generates list of usernames
-datamuse.generate_names()
-
 # global variables
 users_active = 0
 users_time = {} # userid:join time
 last_emitted_timestamp = 0 # userid:lastemittedtime
-usernames_dict = {}
-
 
 # on connect
 # (1) update active users; (2) save user join time; 
 # (3) send username to client; (4) emit chat log and (5) new user mssg
 @socketio.on('connect')
 def on_connect():
+    serverid = get_serverid()
     
-    socketio.emit('connected', {'test': 'Connected'})
-    
-    global users_time
-    global usernames_dict
-    
-    userid = get_serverid()
-    create_username(userid)
-    
-    print('Someone connected!', userid)
+    print('Someone connected!', serverid)
 
-    users_time[userid] = datetime.now() # 2
     EMIT_CHAT_LOG(0) # 4
-    user_chat_status( usernames_dict[ userid ] + " has joined the chat." ) # 5
+    
 
 
 # on disconnect
 # (1) update active users; (2) user left mssg; (3) remove user from global vars
 @socketio.on('disconnect')
 def on_disconnect():
-    userid = get_serverid()
-    print ('Someone disconnected!', userid)
+    this_serverid = get_serverid()
+    print ('Someone disconnected!', this_serverid)
     
-    update_users_active(-1) # 1
-    user_chat_status( usernames_dict[ userid ] + " has left the chat." ) # 2
+    update_users_active() # 1
+    user_chat_status( get_username() + " has left the chat." ) # 2
     
-    # 3
-    usernames_dict.pop(userid, None)
-    users_time.pop(userid, None)
+    ActiveUsers.query.filter_by(serverid=this_serverid).delete()
+    
     
     
 # recieved google user
 @socketio.on('new google user')
 def get_google_user(data):
     email = data['email']
-    image = data
+    image = data['image']
     
     serverid = get_serverid()
     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
@@ -132,43 +120,34 @@ def get_google_user(data):
     db.session.add(ActiveUsers(username, auth, serverid, image, timestamp))
     db.session.commit()
     
-    update_users_active(1)
+    update_users_active()
+    user_chat_status( username + " has joined the chat." ) # 5
     
     
-# greturns flask server id    
+# returns flask server id    
 def get_serverid():
     return flask.request.sid
 
 
-# creates and saves username using array from datamuse mod
-def create_username(userid):
-    global usernames_dict
+# gets username from active users db
+def get_username():
+    this_serverid = get_serverid()
+    user_info = ActiveUsers.query.filter_by(serverid=this_serverid).first()
     
-    # if all names taken, will just use userid
-    if (len(datamuse.usernames) == 0):
-        usernames_dict[userid] = str(userid)
-        return
-    
-    name = random.choice( datamuse.usernames )
-    usernames_dict[userid] = name
-    
-    datamuse.usernames.remove(name)
+    return user_info.username
 
 
 # sends username to client
 def send_username():
-    global usernames_dict
-    
-    userid = get_serverid()
-    name = usernames_dict[ userid ]
+    name = get_username()
     socketio.emit('username channel', {'username':name})
 
 
 # updates and emits # of users
-def update_users_active(update):
-    global users_active
+def update_users_active():
+    data = ActiveUsers.query.all()
     
-    users_active += update
+    users_active = len(data)
     socketio.emit('active users channel', {'users':users_active})
     
     
@@ -190,7 +169,8 @@ def get_chat_log(timestamp):
     
     for entry in query:
         d = {}
-        d['userid'] = entry.userid
+        d['username'] = entry.userid
+        d['auth'] = entry.auth
         d['message'] = entry.message
         d['timestamp'] = str(entry.timestamp)
         output.append(d)
@@ -204,10 +184,8 @@ def get_chat_log(timestamp):
 # saves message from client in db & checks if bot command
 @socketio.on('message channel')
 def save_message(data):
-    global usernames_dict
-    
-    userid = get_serverid()
-    username = usernames_dict[ userid ]
+
+    username = get_username()
     
     try:
         message = data['mssg']
@@ -217,9 +195,10 @@ def save_message(data):
         
     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
     
-    print("Recieved message from: ", userid, username)
+    print("Recieved message from: ", username)
     
-    db.session.add(ChatLog(username, message, timestamp))
+    user_info = ActiveUsers.query.filter(ActiveUsers.username == username).first()
+    db.session.add(ChatLog(username, user_info.auth, message, timestamp))
     db.session.commit()
     
     if message[0:2] == "!!":
@@ -229,8 +208,8 @@ def save_message(data):
     
 
 # sends err mssg with empty user and time
-def message_recieve_fail(userid):
-    string = "ERROR: Message from " + usernames_dict[userid] + " failed to send."
+def message_recieve_fail(username):
+    string = "ERROR: Message from " + username + " failed to send."
     
     data = {'userid':"", 'message':string, 'timestamp':""}
     socketio.emit('chat log channel', {'chat_log': data, 'timestamp':""})
@@ -301,10 +280,11 @@ def handle_bot(message):
 # saves bot message to db and emits chat
 def bot_save_message(message):
     userid = "chit-chat-bot"
+    auth = "Bot"
     message = message
     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
     
-    db.session.add(ChatLog(userid, message, timestamp))
+    db.session.add(ChatLog(userid, auth, message, timestamp))
     db.session.commit()
     
     EMIT_CHAT_LOG()
