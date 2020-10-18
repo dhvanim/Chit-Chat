@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Socket } from './Socket';
 import { Users } from './Users';
 import { ChatBox } from './ChatBox';
+import { GoogleButton } from './GoogleButton';
 
 export function Content() {
     
@@ -19,13 +20,20 @@ export function Content() {
         
     }
     
+    const [status, setstatus] = React.useState(false);
+    
     return (
         <div>
-
+            
+          
             <div class="header">
                 <Users />
             </div>
             
+            { status == false ? <GoogleButton /> :  
+            
+            <div>
+             
             <div class="chatbox">
             
                 <ChatBox />
@@ -38,6 +46,10 @@ export function Content() {
                     <input id="submit" type="submit"></input>
                 </form>
             </div>
+            
+            </div>
+            
+            }
             
         </div>
     );
