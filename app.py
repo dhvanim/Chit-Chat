@@ -100,14 +100,20 @@ def on_disconnect():
     print ('Someone disconnected!', this_serverid)
     
     emit_users_active() # 1
-    user_chat_status( get_username( this_serverid ) + " has left the chat." ) # 2
     
-    print("on disconnect delete user info")
-    print ( ActiveUsers.query.filter_by(serverid=this_serverid) )
-    ActiveUsers.query.filter_by(serverid=this_serverid).delete()
-    print("deleted")
+    if logged_on(this_serverid):
+        user_chat_status( get_username( this_serverid ) + " has left the chat." ) # 2
+        
+        print("on disconnect delete user info")
+        ActiveUsers.query.filter_by(serverid=this_serverid).delete()
+        print("deleted")
     
-    
+
+def logged_on(this_serverid):
+    print( "logged on", ActiveUsers.query.filter_by(serverid=this_serverid).first() )
+    if ( ActiveUsers.query.filter_by(serverid=this_serverid).first() == None ):
+        return False
+    return True
     
 # recieved google user
 @socketio.on('new google user')
@@ -154,7 +160,7 @@ def emit_users_active():
     
 # emits message if user joins/leaves (uses modified chat log channel)
 def user_chat_status(string):
-    data = {'userid':"", 'message':string, 'timestamp':""}
+    data = {'username':"", 'message':string, 'timestamp':""}
     socketio.emit('chat log channel', {'chat_log': data, 'timestamp':""})
 
     
@@ -170,7 +176,7 @@ def get_chat_log(timestamp):
     
     for entry in query:
         d = {}
-        d['username'] = entry.userid
+        d['username'] = entry.username
         d['auth'] = entry.auth
         d['message'] = entry.message
         d['timestamp'] = str(entry.timestamp)
@@ -213,7 +219,7 @@ def save_message(data):
 def message_recieve_fail(username):
     string = "ERROR: Message from " + username + " failed to send."
     
-    data = {'userid':"", 'message':string, 'timestamp':""}
+    data = {'username':"", 'message':string, 'timestamp':""}
     socketio.emit('chat log channel', {'chat_log': data, 'timestamp':""})
     
     
@@ -281,12 +287,12 @@ def handle_bot(message):
   
 # saves bot message to db and emits chat
 def bot_save_message(message):
-    userid = "chit-chat-bot"
+    username = "chit-chat-bot"
     auth = "Bot"
     message = message
     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
     
-    db.session.add(ChatLog(userid, auth, message, timestamp))
+    db.session.add(ChatLog(username, auth, message, timestamp))
     db.session.commit()
     
     EMIT_CHAT_LOG()
