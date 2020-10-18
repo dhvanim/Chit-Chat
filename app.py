@@ -48,6 +48,19 @@ class ChatLog(db.Model):
     def __repr__(self):
         return '<ChatLog userid: %s \n message: %s \n timestamp: %s>' %(self.userid, self.message, self.timestamp)
 
+class ActiveUsers(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(280))
+    serverid = db.Column(db.Integer)
+    
+    def __init__(self, u, s):
+        self.username = u
+        self.serverid = s
+        
+    def __repr__(self):
+        return '<Users username: %s \n serverid: %s>' %(self.username, self.serverid)
+
+    
 ### ### ### ### ### ### 
 
 db.create_all()
@@ -79,7 +92,7 @@ def on_connect():
     
     print('Someone connected!', userid)
 
-    update_users_active(1) # 1
+    
     users_time[userid] = datetime.now() # 2
     send_username() # 3
     EMIT_CHAT_LOG(0) # 4
@@ -99,6 +112,15 @@ def on_disconnect():
     # 3
     usernames_dict.pop(userid, None)
     users_time.pop(userid, None)
+    
+@socketio.on('new google user')
+def get_google_user(data):
+    email = data['email']
+    image = data['image']
+    
+    update_users_active(1) # 1
+    
+    
     
     
 # greturns flask server id    

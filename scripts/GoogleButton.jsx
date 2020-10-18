@@ -7,11 +7,12 @@ export function GoogleButton() {
     
     const responseGoogle = (response) => {
       console.log(response);
-      let name = response['profileObj']['name'];
       let email = response['profileObj']['email'];
-      console.log(name, email);
+      let image = response['profileObj']['imageUrl'];
       
-      Socket.emit('new google user', {'name':name, 'email':email});
+      console.log(email, image);
+      
+      Socket.emit('new google user', {'email':email, 'image':image});
     };
     
     
