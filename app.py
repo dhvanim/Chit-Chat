@@ -96,13 +96,13 @@ def on_connect():
 # (1) update active users; (2) user left mssg; (3) remove user from global vars
 @socketio.on('disconnect')
 def on_disconnect():
-    this_serverid = get_serverid()
-    print ('Someone disconnected!', this_serverid)
+    serverid = get_serverid()
+    print ('Someone disconnected!', serverid)
     
     emit_users_active() # 1
     user_chat_status( get_username() + " has left the chat." ) # 2
     
-    ActiveUsers.query.filter_by(serverid=this_serverid).delete()
+    ActiveUsers.query.filter_by(ActiveUsers.serverid==serverid).delete()
     
     
     

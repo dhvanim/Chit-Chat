@@ -22,6 +22,22 @@ export function Content() {
     
     const [status, setstatus] = React.useState(false);
     
+    function updateStatus() {
+        React.useEffect( () => {
+            Socket.on('user auth channel', data => {
+                setstatus(data['auth']);
+                console.log("status data", data['auth']);
+            });
+            return () => {
+                Socket.off('user auth channel');
+            };
+        });
+        
+        console.log("status", status);
+    }
+    
+    updateStatus();
+    
     return (
         <div>
             
