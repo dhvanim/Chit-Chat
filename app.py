@@ -38,7 +38,7 @@ class ChatLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     userid = db.Column(db.String(280), nullable=False)
     message = db.Column(db.String(280))
-    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
         
     def __init__(self, u, m, t):
         self.userid = u
@@ -51,11 +51,17 @@ class ChatLog(db.Model):
 class ActiveUsers(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(280))
+    auth = db.Column(db.String(20))
     serverid = db.Column(db.Integer)
+    icon = db.Column(db.String(280))
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
     
-    def __init__(self, u, s):
+    def __init__(self, u, a, s, i, t):
         self.username = u
+        self.auth = a
         self.serverid = s
+        self.icon = i
+        self.timestamp = t
         
     def __repr__(self):
         return '<Users username: %s \n serverid: %s>' %(self.username, self.serverid)
@@ -87,14 +93,12 @@ def on_connect():
     global users_time
     global usernames_dict
     
-    userid = get_userid()
+    userid = get_serverid()
     create_username(userid)
     
     print('Someone connected!', userid)
 
-    
     users_time[userid] = datetime.now() # 2
-    send_username() # 3
     EMIT_CHAT_LOG(0) # 4
     user_chat_status( usernames_dict[ userid ] + " has joined the chat." ) # 5
 
@@ -103,7 +107,7 @@ def on_connect():
 # (1) update active users; (2) user left mssg; (3) remove user from global vars
 @socketio.on('disconnect')
 def on_disconnect():
-    userid = get_userid()
+    userid = get_serverid()
     print ('Someone disconnected!', userid)
     
     update_users_active(-1) # 1
@@ -113,18 +117,26 @@ def on_disconnect():
     usernames_dict.pop(userid, None)
     users_time.pop(userid, None)
     
+    
+# recieved google user
 @socketio.on('new google user')
 def get_google_user(data):
     email = data['email']
-    image = data['image']
+    image = data
     
-    update_users_active(1) # 1
+    serverid = get_serverid()
+    timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+    username = email.split('@')[0]
+    auth = "Google"
     
+    db.session.add(ActiveUsers(username, auth, serverid, image, timestamp))
+    db.session.commit()
     
+    update_users_active(1)
     
     
 # greturns flask server id    
-def get_userid():
+def get_serverid():
     return flask.request.sid
 
 
@@ -147,7 +159,7 @@ def create_username(userid):
 def send_username():
     global usernames_dict
     
-    userid = get_userid()
+    userid = get_serverid()
     name = usernames_dict[ userid ]
     socketio.emit('username channel', {'username':name})
 
@@ -194,7 +206,7 @@ def get_chat_log(timestamp):
 def save_message(data):
     global usernames_dict
     
-    userid = get_userid()
+    userid = get_serverid()
     username = usernames_dict[ userid ]
     
     try:
@@ -278,7 +290,7 @@ def handle_bot(message):
         reply = bot.bot_spotify(artist)
         
     elif (command == 'time'):
-        reply = bot.bot_time( users_time[get_userid()] )
+        reply = bot.bot_time( users_time[get_serverid()] )
         
     else:
         reply = bot.bot_unknown(command)
