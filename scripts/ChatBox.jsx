@@ -77,7 +77,6 @@ export function ChatBox() {
         const scrollToBottom = () => {
             messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
         };
-
         React.useEffect(scrollToBottom, [messages]);
     }
     
@@ -95,7 +94,6 @@ export function ChatBox() {
         if (id == "") {
             return "entereduser";
         }
-        
         return "user";
     }
     
