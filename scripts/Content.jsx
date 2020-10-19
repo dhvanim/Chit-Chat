@@ -9,9 +9,8 @@ export function Content() {
     
     /* sends chat message to server */
     function sendChat(event) {
-        let username = ChatBox.username;
         let mssg = document.getElementById("typeinput");
-        Socket.emit('message channel', {'mssg':mssg.value, 'username':username});
+        Socket.emit('message channel', {'mssg':mssg.value});
         
         console.log('message sent to server');
         

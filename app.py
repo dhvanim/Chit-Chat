@@ -122,12 +122,13 @@ def get_google_user(data):
     username = email.split('@')[0]
     auth = "Google"
     
+    print("sent username")
+    
     db.session.add(ActiveUsers(username, auth, serverid, image, timestamp))
     db.session.commit()
     
     socketio.emit('user auth channel', {'auth':True})
     socketio.emit('username channel', {'username':username})
-    
     emit_users_active()
     EMIT_CHAT_LOG(0) # 4
     user_chat_status( username + " has joined the chat." ) # 5
