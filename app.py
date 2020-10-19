@@ -74,23 +74,19 @@ class ActiveUsers(db.Model):
 db.create_all()
 db.session.commit()
 
-# global variables
-users_time = {} # userid:join time
+
 last_emitted_timestamp = 0 # userid:lastemittedtime
 
-# on connect
-# (1) update active users; (2) save user join time; 
-# (3) send username to client; (4) emit chat log and (5) new user mssg
+
+# on connect emit active users
 @socketio.on('connect')
 def on_connect():
     serverid = get_serverid()
     print('Someone connected!', serverid)
-    
+    emit_users_active()
     
 
-
-# on disconnect
-# (1) update active users; (2) user left mssg; (3) remove user from global vars
+# on disconnect --> if user was logged in, emit user status and delete from activeusers table
 @socketio.on('disconnect')
 def on_disconnect():
     this_serverid = get_serverid()
@@ -106,13 +102,16 @@ def on_disconnect():
     
     emit_users_active() # 1
 
+
+# checks activeusers table for serverid
 def logged_on(this_serverid):
-    print( "logged on", ActiveUsers.query.filter_by(serverid=this_serverid).first() )
     if ( ActiveUsers.query.filter_by(serverid=this_serverid).first() == None ):
         return False
     return True
     
-# recieved google user
+    
+# get new google user & commit info to db, 
+# emit user auth, name, active users, chat log, and user status
 @socketio.on('new google user')
 def get_google_user(data):
     email = data['email']
@@ -151,7 +150,6 @@ def get_username( this_serverid ):
 # updates and emits # of users
 def emit_users_active():
     data = ActiveUsers.query.all()
-    
     users_active = len(data)
     socketio.emit('active users channel', {'users':users_active})
     
@@ -159,6 +157,7 @@ def emit_users_active():
 # emits message if user joins/leaves (uses modified chat log channel)
 def user_chat_status(string):
     data = {'username':"", 'message':string, 'timestamp':""}
+    
     socketio.emit('chat log channel', {'chat_log': data, 'timestamp':""})
 
     
@@ -221,7 +220,7 @@ def message_recieve_fail(username):
     socketio.emit('chat log channel', {'chat_log': data, 'timestamp':""})
     
     
-# emits chat log and timestamp, if chat log not empty
+# emits chat log and timestamp (if chat log not empty)
 def EMIT_CHAT_LOG(specified_time=None):
     global last_emitted_timestamp
     timestamp = ""
@@ -243,7 +242,6 @@ def EMIT_CHAT_LOG(specified_time=None):
     
 # calls appropriate function to execute and saves message
 def handle_bot(message):
-    global users_time
     bot_commands = ['!! about', '!! help', '!! translate', '!! spotify', '!! time']
 
     message_arr = message.split()
@@ -275,7 +273,9 @@ def handle_bot(message):
         reply = bot.bot_spotify(artist)
         
     elif (command == 'time'):
-        reply = bot.bot_time( users_time[get_serverid()] )
+        this_username = get_username( get_serverid() )
+        user_info = ActiveUsers.query.filter_by(username = this_username).first()
+        reply = bot.bot_time( user_info.timestamp  )
         
     else:
         reply = bot.bot_unknown(command)
