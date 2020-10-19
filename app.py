@@ -40,15 +40,18 @@ class ChatLog(db.Model):
     auth = db.Column(db.String(20))
     message = db.Column(db.String(280))
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    message_type = db.Column(db.String(10))
         
-    def __init__(self, u, a, m, t):
+    def __init__(self, u, a, m, t, mt):
         self.username = u
         self.auth = a
         self.message = m
         self.timestamp = t
+        self.message_type = mt
         
     def __repr__(self):
         return '<ChatLog username: %s \n message: %s \n timestamp: %s>' %(self.username, self.message, self.timestamp)
+
 
 class ActiveUsers(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -157,7 +160,7 @@ def emit_users_active():
     
 # emits message if user joins/leaves (uses modified chat log channel)
 def user_chat_status(string):
-    data = {'username':"", 'auth':"", 'message':string, 'timestamp':""}
+    data = {'username':"", 'auth':"", 'message':string, 'timestamp':"", 'message_type':"status"}
     
     socketio.emit('chat log channel', {'chat_log': data, 'timestamp':""})
 
@@ -178,6 +181,7 @@ def get_chat_log(timestamp):
         d['auth'] = entry.auth
         d['message'] = entry.message
         d['timestamp'] = str(entry.timestamp)
+        d['message_type'] = entry.message_type
         output.append(d)
     
     if (len(output) != 0):  # updates last emitted timestamp
@@ -198,13 +202,14 @@ def save_message(data):
         message_recieve_fail(this_username)
         
     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-    
+    message_type = handle_links(message)
+
     print("Recieved message from: ", this_username)
-    
     user_info = ActiveUsers.query.filter_by(username = this_username).first()
     print("save message user info")
     print(user_info)
-    db.session.add(ChatLog(this_username, user_info.auth, message, timestamp))
+    db.session.add(ChatLog(this_username, user_info.auth, message, timestamp, message_type))
+
     db.session.commit()
     
     if message[0:2] == "!!":
@@ -212,12 +217,22 @@ def save_message(data):
     
     EMIT_CHAT_LOG()
     
+    
+# returns message type
+def handle_links(message):
+    if (message.startswith('http://')) or (message.startswith('https://')):
+        if (message.endswith('.jpg') or message.endswith('.jpeg') or message.endswith('.png') or message.endswith('.gif')):
+            return "image"
+        return "link"
+        
+    return "text"
+
 
 # sends err mssg with empty user and time
 def message_recieve_fail(username):
     string = "ERROR: Message from " + username + " failed to send."
-    
-    data = {'username':"", 'auth':"", 'message':string, 'timestamp':""}
+
+    data = {'username':"", 'auth':"", 'message':string, 'timestamp':"", 'message_type':"status"}
     socketio.emit('chat log channel', {'chat_log': data, 'timestamp':""})
     
     
@@ -239,6 +254,7 @@ def EMIT_CHAT_LOG(specified_time=None):
     socketio.emit('chat log channel', {'chat_log':chat_log, 'timestamp':last_emitted_timestamp})
     
     print("emitted chat log of length", len(chat_log))
+    print(chat_log)
 
     
 # calls appropriate function to execute and saves message
@@ -290,8 +306,8 @@ def bot_save_message(message):
     auth = "Bot"
     message = message
     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-    
-    db.session.add(ChatLog(username, auth, message, timestamp))
+
+    db.session.add(ChatLog(username, auth, message, timestamp, "bot"))
     db.session.commit()
     
     EMIT_CHAT_LOG()

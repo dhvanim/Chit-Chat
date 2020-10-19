@@ -132,6 +132,20 @@ li {
     opacity:0.8;
 }
 
+.message_image {
+    max-width: 100%;
+    margin: 5px 0px;
+}
+
+.message_link {
+    color:#3f354d;
+    font-weight:bold;
+}
+
+.message_link:hover {
+    color:#E5B2FF;
+}
+
 /* form */
 
 .form {
