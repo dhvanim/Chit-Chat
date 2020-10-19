@@ -120,6 +120,7 @@ export function ChatBox() {
                         { message.username == "" ? <span class="message"> <br /> {message.message} <br/> </span> :
                         
                         <span>
+                        <img class="usericon" src={message.icon} />
                         <span class="userid">{message.username} <span class="auth">via {message.auth}</span></span> <br />
                         { message_type( message.message, message.message_type ) } <br />
                         <span class="timestamp">{message.timestamp}</span>

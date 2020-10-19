@@ -127,6 +127,18 @@ li {
     font-weight:normal;
 }
 
+.user .usericon, .botuser .usericon {
+    width:7%;
+    float:left;
+    padding-right: 5px;
+}
+
+.thisuser .usericon {
+    width:7%;
+    float:right;
+    padding-left: 5px;
+}
+
 .timestamp {
     font-size:9px;
     opacity:0.8;
