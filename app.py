@@ -75,7 +75,6 @@ db.create_all()
 db.session.commit()
 
 # global variables
-users_active = 0
 users_time = {} # userid:join time
 last_emitted_timestamp = 0 # userid:lastemittedtime
 
@@ -85,10 +84,8 @@ last_emitted_timestamp = 0 # userid:lastemittedtime
 @socketio.on('connect')
 def on_connect():
     serverid = get_serverid()
-    
     print('Someone connected!', serverid)
-    emit_users_active()
-    EMIT_CHAT_LOG(0) # 4
+    
     
 
 
@@ -99,15 +96,15 @@ def on_disconnect():
     this_serverid = get_serverid()
     print ('Someone disconnected!', this_serverid)
     
-    emit_users_active() # 1
-    
     if logged_on(this_serverid):
         user_chat_status( get_username( this_serverid ) + " has left the chat." ) # 2
         
         print("on disconnect delete user info")
         ActiveUsers.query.filter_by(serverid=this_serverid).delete()
+        db.session.commit()
         print("deleted")
     
+    emit_users_active() # 1
 
 def logged_on(this_serverid):
     print( "logged on", ActiveUsers.query.filter_by(serverid=this_serverid).first() )
@@ -133,6 +130,7 @@ def get_google_user(data):
     socketio.emit('username channel', {'username':username})
     
     emit_users_active()
+    EMIT_CHAT_LOG(0) # 4
     user_chat_status( username + " has joined the chat." ) # 5
     
     
