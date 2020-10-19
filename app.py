@@ -38,13 +38,15 @@ class ChatLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(280), nullable=False)
     auth = db.Column(db.String(20))
+    icon = db.Column(db.String(280))
     message = db.Column(db.String(280))
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now())
     message_type = db.Column(db.String(10))
         
-    def __init__(self, u, a, m, t, mt):
+    def __init__(self, u, a, i, m, t, mt):
         self.username = u
         self.auth = a
+        self.icon = i
         self.message = m
         self.timestamp = t
         self.message_type = mt
@@ -179,6 +181,7 @@ def get_chat_log(timestamp):
         d = {}
         d['username'] = entry.username
         d['auth'] = entry.auth
+        d['icon'] = entry.icon
         d['message'] = entry.message
         d['timestamp'] = str(entry.timestamp)
         d['message_type'] = entry.message_type
@@ -208,7 +211,7 @@ def save_message(data):
     user_info = ActiveUsers.query.filter_by(username = this_username).first()
     print("save message user info")
     print(user_info)
-    db.session.add(ChatLog(this_username, user_info.auth, message, timestamp, message_type))
+    db.session.add(ChatLog(this_username, user_info.icon, user_info.auth, message, timestamp, message_type))
 
     db.session.commit()
     
@@ -304,10 +307,11 @@ def handle_bot(message):
 def bot_save_message(message):
     username = "chit-chat-bot"
     auth = "Bot"
+    icon = "./static/boticon.jpg"
     message = message
     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 
-    db.session.add(ChatLog(username, auth, message, timestamp, "bot"))
+    db.session.add(ChatLog(username, icon, auth, message, timestamp, "bot"))
     db.session.commit()
     
     EMIT_CHAT_LOG()
