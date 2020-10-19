@@ -211,7 +211,7 @@ def save_message(data):
     user_info = ActiveUsers.query.filter_by(username = this_username).first()
     print("save message user info")
     print(user_info)
-    db.session.add(ChatLog(this_username, user_info.icon, user_info.auth, message, timestamp, message_type))
+    db.session.add(ChatLog(this_username, user_info.auth, user_info.icon, message, timestamp, message_type))
 
     db.session.commit()
     
@@ -311,7 +311,7 @@ def bot_save_message(message):
     message = message
     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 
-    db.session.add(ChatLog(username, icon, auth, message, timestamp, "bot"))
+    db.session.add(ChatLog(username, auth, icon, message, timestamp, "bot"))
     db.session.commit()
     
     EMIT_CHAT_LOG()
