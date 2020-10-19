@@ -128,8 +128,8 @@ def get_google_user(data):
     db.session.commit()
     
     socketio.emit('user auth channel', {'auth':True})
-    socketio.emit('username channel', {'username':username})
     emit_users_active()
+    socketio.emit('username channel', {'username':username})
     EMIT_CHAT_LOG(0) # 4
     user_chat_status( username + " has joined the chat." ) # 5
     
