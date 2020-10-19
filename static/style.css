@@ -121,6 +121,12 @@ li {
     opacity:0.9;
 }
 
+.auth {
+    font-style:italic;
+    font-size:10px;
+    font-weight:normal;
+}
+
 .timestamp {
     font-size:9px;
     opacity:0.8;

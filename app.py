@@ -157,7 +157,7 @@ def emit_users_active():
     
 # emits message if user joins/leaves (uses modified chat log channel)
 def user_chat_status(string):
-    data = {'username':"", 'message':string, 'timestamp':""}
+    data = {'username':"", 'auth':"", 'message':string, 'timestamp':""}
     
     socketio.emit('chat log channel', {'chat_log': data, 'timestamp':""})
 
@@ -217,7 +217,7 @@ def save_message(data):
 def message_recieve_fail(username):
     string = "ERROR: Message from " + username + " failed to send."
     
-    data = {'username':"", 'message':string, 'timestamp':""}
+    data = {'username':"", 'auth':"", 'message':string, 'timestamp':""}
     socketio.emit('chat log channel', {'chat_log': data, 'timestamp':""})
     
     

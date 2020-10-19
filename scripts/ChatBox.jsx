@@ -103,9 +103,15 @@ export function ChatBox() {
         <ul>
                 { messages.map( (message,index) => 
                     <li key={index} class={ getLIClass(message.username) }> 
-                        <span class="userid">{message.username}</span> <br />
+                        
+                        { message.username == "" ? <span class="message"> <br /> {message.message} <br/> </span> :
+                        
+                        <span>
+                        <span class="userid">{message.username} <span class="auth">via {message.auth}</span></span> <br />
                         <span class="message">{message.message}</span> <br />
                         <span class="timestamp">{message.timestamp}</span>
+                        </span>
+                        }
                     </li>
                 )}
                 
