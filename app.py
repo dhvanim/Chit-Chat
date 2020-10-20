@@ -208,9 +208,13 @@ def save_message(data):
     message_type = handle_links(message)
     user_info = ActiveUsers.query.filter_by(username = this_username).first()
     
-    db.session.add(ChatLog(this_username, user_info.auth, user_info.icon, message, timestamp, message_type))
-    db.session.commit()
-    
+    try:
+        db.session.add(ChatLog(this_username, user_info.auth, user_info.icon, message, timestamp, message_type))
+        db.session.commit()
+    except:
+        print("Could not recieve message from", this_username)
+        message_recieve_fail(this_username)
+        
     if message[0:2] == "!!":
         handle_bot(message)
     
