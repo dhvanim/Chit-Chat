@@ -36,16 +36,18 @@ SPOTIFY_CLIENT_SECRET={your client secret here}
 
 
 ## 3. Set up Google Authorization
-1. Install the following to easily use Google Auth with React <br / >
+1. Install the following to easily use Google Auth with React <br />
 ``` $ npm install react-google-login ``` <br />
 
-2. Create a Google developer's account and head to https://console.developers.google.com/
+2. Create a Google account (https://www.google.com/) and then head to https://console.cloud.google.com/apis/dashboard
 
-3. On the left hand side, click <i>Credentials</i>, then click <i>Create Credentials</i>, then <i>OAuthClient ID</i>
+3. On the left hand side, click (i.) <i>Credentials</i>, (ii.) <i>Create Credentials</i>, then (iii.) <i>OAuthClient ID</i>
 
-4. The application type should be <i>Web Application</i>; the name can be anything, and paste the url of your website under <i> Authorized Javascript origins</i>
+4. The application type should be <i>Web Application</i>; the name can be anything, and paste the url of your website under <i>Authorized Javascript origins</i>
 
-5. Copy your Client ID (NOT Client Secret), and paste it in <i>GoogleButton.jsx</i>, where it said `clientId="{Client ID here}"`
+5. Copy your Client ID (NOT Client Secret), and paste it in <i>scripts/GoogleButton.jsx</i>, where it said `clientId="{Client ID here}"`
+
+![Image of Google Auth Directions](https://github.com/NJIT-CS490/project2-m2-dmm77/blob/master/readme_googleauth.jpg)
 
 
 
