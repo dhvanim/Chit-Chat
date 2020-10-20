@@ -106,14 +106,13 @@ def on_disconnect():
         user_chat_status( get_username( this_serverid ) + " has left the chat." )
         ActiveUsers.query.filter_by(serverid=this_serverid).delete()
         db.session.commit()
-        print("deleted")
+        print("deleted user")
     
     emit_users_active() 
 
 
 # checks activeusers table for serverid
 def logged_on(this_serverid):
-    print("check if logged on")
     print( ActiveUsers.query.filter_by(serverid=this_serverid).first() )
     if ( ActiveUsers.query.filter_by(serverid=this_serverid).first() == None ):
         return False
@@ -208,9 +207,13 @@ def save_message(data):
     message_type = handle_links(message)
     user_info = ActiveUsers.query.filter_by(username = this_username).first()
     
-    db.session.add(ChatLog(this_username, user_info.auth, user_info.icon, message, timestamp, message_type))
-    db.session.commit()
-    
+    try:
+        db.session.add(ChatLog(this_username, user_info.auth, user_info.icon, message, timestamp, message_type))
+        db.session.commit()
+    except:
+        print("Could not recieve message from", this_username)
+        message_recieve_fail(this_username)
+        
     if message[0:2] == "!!":
         handle_bot(message)
     
@@ -220,6 +223,8 @@ def save_message(data):
 # returns message type
 # got this directly from https://stackoverflow.com/questions/7160737/how-to-validate-a-url-in-python-malformed-or-not
 def handle_links(message):
+    if len(message.split(" ")) > 1:
+        return "text"
     try:
         result = urlparse(message)
         

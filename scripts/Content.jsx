@@ -57,7 +57,7 @@ export function Content() {
             
             <div class="form">
                 <form onSubmit={sendChat}>
-                    <input id="typeinput" type="text" placeholder="Type a message here..."></input>
+                    <input id="typeinput" type="text" placeholder="Type a message here..." maxlength="280"></input>
                     <input id="submit" type="submit"></input>
                 </form>
             </div>

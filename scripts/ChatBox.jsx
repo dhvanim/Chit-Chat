@@ -102,6 +102,7 @@ export function ChatBox() {
     
     /* loops through messages and displays in ul */
     return (
+          
         <ul>
                 { messages.map( (message,index) => 
                     <li key={index} class={ getLIClass(message.username) }> 
@@ -114,7 +115,9 @@ export function ChatBox() {
                         { message_type( message.message, message.message_type ) } <br />
                         <span class="timestamp">{message.timestamp}</span>
                         </span>
+                        
                         }
+                        
                     </li>
                 )}
                 
