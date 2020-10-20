@@ -9,7 +9,6 @@ from datetime import datetime
 import requests
 import random
 import bot
-import datamuse
 from flask import request
 
 # set up flask app, db, and socket
@@ -81,21 +80,21 @@ db.create_all()
 db.session.commit()
 
 
-last_emitted_timestamp = 0 # userid:lastemittedtime
+last_emitted_timestamp = 0
 
 
-# on connect emit active users
+# on connect join room and emit active users
 @socketio.on('connect')
 def on_connect():
     serverid = get_serverid()
-    
     join_room( serverid )
-    
     print('Someone connected!', serverid)
+    
     emit_users_active()
     
 
-# on disconnect --> if user was logged in, emit user status and delete from activeusers table
+# on disconnect leave room -> 
+# if user was logged in, emit user status and delete from activeusers table
 @socketio.on('disconnect')
 def on_disconnect():
     this_serverid = get_serverid()
@@ -103,14 +102,11 @@ def on_disconnect():
     print ('Someone disconnected!', this_serverid)
     
     if logged_on(this_serverid):
-        user_chat_status( get_username( this_serverid ) + " has left the chat." ) # 2
-        
-        print("on disconnect delete user info")
+        user_chat_status( get_username( this_serverid ) + " has left the chat." )
         ActiveUsers.query.filter_by(serverid=this_serverid).delete()
         db.session.commit()
-        print("deleted")
     
-    emit_users_active() # 1
+    emit_users_active() 
 
 
 # checks activeusers table for serverid
@@ -131,17 +127,15 @@ def get_google_user(data):
     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
     username = email.split('@')[0]
     auth = "Google"
-    
-    print("sent username")
-    
+
     db.session.add(ActiveUsers(username, auth, serverid, image, timestamp))
     db.session.commit()
     
     socketio.emit('user auth channel', {'auth':True}, room=serverid)
     emit_users_active()
     socketio.emit('username channel', {'username':username}, room=serverid)
-    EMIT_CHAT_LOG(0, serverid) # 4
-    user_chat_status( username + " has joined the chat." ) # 5
+    EMIT_CHAT_LOG(0, serverid)
+    user_chat_status( username + " has joined the chat." )
     
     
 # returns flask server id    
@@ -151,14 +145,11 @@ def get_serverid():
 
 # gets username from active users db
 def get_username( this_serverid ):
-    
     user_info = ActiveUsers.query.filter_by(serverid=this_serverid).first()
-    print("get username user info")
-    print(user_info)
     return user_info.username
 
 
-# updates and emits # of users
+# updates and emits # of users from db table
 def emit_users_active():
     data = ActiveUsers.query.all()
     users_active = len(data)
@@ -167,8 +158,7 @@ def emit_users_active():
     
 # emits message if user joins/leaves (uses modified chat log channel)
 def user_chat_status(string):
-    data = {'username':"", 'auth':"", 'message':string, 'timestamp':"", 'message_type':"status"}
-    
+    data = {'username':"", 'message':string, 'timestamp':""}
     socketio.emit('chat log channel', {'chat_log': data, 'timestamp':""})
 
     
@@ -206,18 +196,15 @@ def save_message(data):
     try:
         message = data['mssg']
     except:
-        print("Could not recieve message")
+        print("Could not recieve message from", this_username)
         message_recieve_fail(this_username)
         
+    print("Recieved message from", this_username)
     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
     message_type = handle_links(message)
-
-    print("Recieved message from: ", this_username)
     user_info = ActiveUsers.query.filter_by(username = this_username).first()
-    print("save message user info")
-    print(user_info)
+    
     db.session.add(ChatLog(this_username, user_info.auth, user_info.icon, message, timestamp, message_type))
-
     db.session.commit()
     
     if message[0:2] == "!!":
@@ -232,7 +219,6 @@ def handle_links(message):
         if (message.endswith('.jpg') or message.endswith('.jpeg') or message.endswith('.png') or message.endswith('.gif')):
             return "image"
         return "link"
-        
     return "text"
 
 
@@ -240,7 +226,7 @@ def handle_links(message):
 def message_recieve_fail(username):
     string = "ERROR: Message from " + username + " failed to send."
 
-    data = {'username':"", 'auth':"", 'message':string, 'timestamp':"", 'message_type':"status"}
+    data = {'username':"", 'message':string, 'timestamp':""}
     socketio.emit('chat log channel', {'chat_log': data, 'timestamp':""})
     
     
@@ -303,7 +289,7 @@ def handle_bot(message):
     elif (command == 'time'):
         this_username = get_username( get_serverid() )
         user_info = ActiveUsers.query.filter_by(username = this_username).first()
-        reply = bot.bot_time( user_info.timestamp  )
+        reply = bot.bot_time( user_info.timestamp )
         
     else:
         reply = bot.bot_unknown(command)

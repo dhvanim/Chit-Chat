@@ -21,12 +21,12 @@ export function ChatBox() {
     function updateMessages(data) {
         
         let chatlog = data['chat_log'];
-        let newtimestamp = data['timestamp'];
+        let timestamp = data['timestamp'];
         console.log("Recieved messages from server: ", Object.keys(chatlog).length);
-        console.log("Recieved timestamp: ", newtimestamp);
+        console.log("Recieved timestamp: ", timestamp);
         
         /* user status or error message*/
-        if (newtimestamp == "") {
+        if (timestamp == "") {
             console.log( chatlog );
             setmessages( messages => messages.concat(chatlog) );
             return null;
