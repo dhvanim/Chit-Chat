@@ -106,14 +106,13 @@ def on_disconnect():
         user_chat_status( get_username( this_serverid ) + " has left the chat." )
         ActiveUsers.query.filter_by(serverid=this_serverid).delete()
         db.session.commit()
-        print("deleted")
+        print("deleted user")
     
     emit_users_active() 
 
 
 # checks activeusers table for serverid
 def logged_on(this_serverid):
-    print("check if logged on")
     print( ActiveUsers.query.filter_by(serverid=this_serverid).first() )
     if ( ActiveUsers.query.filter_by(serverid=this_serverid).first() == None ):
         return False
