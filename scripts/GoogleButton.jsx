@@ -24,6 +24,7 @@ export function GoogleButton() {
             
                 <GoogleLogin
                     clientId="407466096960-jiq3qed5a96hfgab7v804rm705mb8vsk.apps.googleusercontent.com"
+                    
                     buttonText="Google"
                     onSuccess={responseGoogle}
                     onFailure={responseGoogle}
