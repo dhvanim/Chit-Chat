@@ -30,6 +30,10 @@ def bot_help(bot_commands):
 
 # requests funtranslate to translate to morse code
 def bot_translate(string):
+    
+    if string == "":
+        return "Please enter text to be translated! :8"
+        
     url = 'https://api.funtranslations.com/translate/morse.json'
     paramaters = {"text":string}
     
@@ -62,6 +66,9 @@ def spotify_get_access_token():
 
 # returns a spotify top track
 def bot_spotify(artist):
+    
+    if artist == "":
+        return "Please enter an artist! :8"
 
     access_token = spotify_get_access_token()
     
