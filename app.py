@@ -220,6 +220,8 @@ def save_message(data):
 # returns message type
 # got this directly from https://stackoverflow.com/questions/7160737/how-to-validate-a-url-in-python-malformed-or-not
 def handle_links(message):
+    if len(message.split(" ")) > 1:
+        return "text"
     try:
         result = urlparse(message)
         
