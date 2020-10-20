@@ -215,11 +215,15 @@ def save_message(data):
     
     
 # returns message type
+# got this directly from https://stackoverflow.com/questions/7160737/how-to-validate-a-url-in-python-malformed-or-not
 def handle_links(message):
     try:
         result = urlparse(message)
-        path = result.path
         
+        if not all([result.scheme, result.netloc, result.path]):
+            return "text"
+            
+        path = result.path
         if path.endswith(".jpg") or path.endswith(".jpeg") or path.endswith(".png") or path.endswith(".gif"):
             return "image"
         return "link"
