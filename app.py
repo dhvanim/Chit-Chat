@@ -123,8 +123,12 @@ def logged_on(this_serverid):
 # emit user auth, name, active users, chat log, and user status
 @socketio.on('new google user')
 def get_google_user(data):
-    email = data['email']
-    image = data['image']
+    
+    try:
+        email = data['email']
+        image = data['image']
+    except:
+        return
     
     serverid = get_serverid()
     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
