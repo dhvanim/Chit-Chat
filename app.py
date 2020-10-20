@@ -140,7 +140,7 @@ def get_google_user(data):
     socketio.emit('user auth channel', {'auth':True}, room=serverid)
     emit_users_active()
     socketio.emit('username channel', {'username':username}, room=serverid)
-    EMIT_CHAT_LOG(0) # 4
+    EMIT_CHAT_LOG(0, serverid) # 4
     user_chat_status( username + " has joined the chat." ) # 5
     
     
@@ -245,7 +245,7 @@ def message_recieve_fail(username):
     
     
 # emits chat log and timestamp (if chat log not empty)
-def EMIT_CHAT_LOG(specified_time=None):
+def EMIT_CHAT_LOG(specified_time=None, room=None):
     global last_emitted_timestamp
     timestamp = ""
     
@@ -259,8 +259,11 @@ def EMIT_CHAT_LOG(specified_time=None):
     if len(chat_log) == 0:
         return
     
-    socketio.emit('chat log channel', {'chat_log':chat_log, 'timestamp':last_emitted_timestamp})
-    
+    if room == None:
+        socketio.emit('chat log channel', {'chat_log':chat_log, 'timestamp':last_emitted_timestamp})
+    else:
+        socketio.emit('chat log channel', {'chat_log':chat_log, 'timestamp':last_emitted_timestamp}, room=room)
+
     print("emitted chat log of length", len(chat_log))
     print(chat_log)
 

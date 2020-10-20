@@ -3,8 +3,7 @@ import { Socket } from './Socket';
 
 
 export function ChatBox() {
-    
-    const [timestamp, settimestamp] = React.useState(0);
+
     const [messages, setmessages] = React.useState([]);
     const [username, setusername] = React.useState("");
     
@@ -24,8 +23,6 @@ export function ChatBox() {
         let chatlog = data['chat_log'];
         let newtimestamp = data['timestamp'];
         console.log("Recieved messages from server: ", Object.keys(chatlog).length);
-        
-        console.log("Timestamp on file: ", timestamp);
         console.log("Recieved timestamp: ", newtimestamp);
         
         /* user status or error message*/
@@ -35,19 +32,11 @@ export function ChatBox() {
             return null;
         }
         
-        /* only updates if the timestamp recieved is later */
-        if (timestamp == newtimestamp || timestamp > newtimestamp) {
-            return null;
-        }
-        
         /* iterates through recieved chatlog and appends to message state */
         chatlog.map( (item) => {
             console.log(item);
             setmessages( messages => messages.concat(item));
         });
-        
-        /* updates timestamp */
-        settimestamp( newtimestamp );
         
         console.log("End of recieved messages.");
     }
