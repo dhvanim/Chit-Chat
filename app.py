@@ -10,6 +10,7 @@ import requests
 import random
 import bot
 import datamuse
+from flask import request
 
 # set up flask app, db, and socket
 app = flask.Flask(__name__)
@@ -87,6 +88,9 @@ last_emitted_timestamp = 0 # userid:lastemittedtime
 @socketio.on('connect')
 def on_connect():
     serverid = get_serverid()
+    
+    join_room( serverid )
+    
     print('Someone connected!', serverid)
     emit_users_active()
     
@@ -95,6 +99,7 @@ def on_connect():
 @socketio.on('disconnect')
 def on_disconnect():
     this_serverid = get_serverid()
+    leave_room( this_serverid )
     print ('Someone disconnected!', this_serverid)
     
     if logged_on(this_serverid):
@@ -132,9 +137,9 @@ def get_google_user(data):
     db.session.add(ActiveUsers(username, auth, serverid, image, timestamp))
     db.session.commit()
     
-    socketio.emit('user auth channel', {'auth':True})
+    socketio.emit('user auth channel', {'auth':True}, room=serverid)
     emit_users_active()
-    socketio.emit('username channel', {'username':username})
+    socketio.emit('username channel', {'username':username}, room=serverid)
     EMIT_CHAT_LOG(0) # 4
     user_chat_status( username + " has joined the chat." ) # 5
     
