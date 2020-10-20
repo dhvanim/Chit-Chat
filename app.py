@@ -10,6 +10,7 @@ import requests
 import random
 import bot
 from flask import request
+from urllib.parse import urlparse
 
 # set up flask app, db, and socket
 app = flask.Flask(__name__)
@@ -215,12 +216,16 @@ def save_message(data):
     
 # returns message type
 def handle_links(message):
-    if (message.startswith('http://')) or (message.startswith('https://')):
-        if (message.endswith('.jpg') or message.endswith('.jpeg') or message.endswith('.png') or message.endswith('.gif')):
+    try:
+        result = urlparse(message)
+        path = result.path
+        
+        if path.endswith(".jpg") or path.endswith(".jpeg") or path.endswith(".png") or path.endswith(".gif"):
             return "image"
         return "link"
-    return "text"
-
+    except:
+        return "text"
+    
 
 # sends err mssg with empty user and time
 def message_recieve_fail(username):
