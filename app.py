@@ -219,7 +219,7 @@ def save_message(data):
         message_recieve_fail(this_username)
         
     if message[0:2] == "!!":
-        handle_bot(message)
+        bot_command(message)
     
     EMIT_CHAT_LOG()
     
@@ -274,6 +274,14 @@ def EMIT_CHAT_LOG(specified_time=None, room=None):
     print("emitted chat log of length", len(chat_log))
     print(chat_log)
 
+
+# gets bot reply and saves
+def bot_command(message):
+    reply = handle_bot(message)
+    if reply == None:
+        return
+    bot_save_message(reply)
+
     
 # calls appropriate function to execute and saves message
 def handle_bot(message):
@@ -283,39 +291,34 @@ def handle_bot(message):
     
     # if no command given
     if (len(message_arr) == 1):
-        return
+        return None
     
     command = message_arr[1]
     
-    print("recieved bot command", command)
-    
-    reply = ""
     
     if (command == 'about'):
-        reply = bot.bot_about()
+        return bot.bot_about()
         
     elif (command == 'help'):
-        reply = bot.bot_help(bot_commands)
+        return bot.bot_help(bot_commands)
         
     elif (command == 'translate'):
         temp = message_arr[2:len(message_arr)]
         translate_string = " ".join(temp)
-        reply = bot.bot_translate(translate_string)
+        return bot.bot_translate(translate_string)
         
     elif (command == 'spotify'):
         temp = message_arr[2:len(message_arr)]
         artist = " ".join(temp)
-        reply = bot.bot_spotify(artist)
+        return bot.bot_spotify(artist)
         
     elif (command == 'time'):
         this_username = get_username( get_serverid() )
         user_info = ActiveUsers.query.filter_by(username = this_username).first()
-        reply = bot.bot_time( user_info.timestamp )
+        return bot.bot_time( user_info.timestamp )
         
     else:
-        reply = bot.bot_unknown(command)
-    
-    bot_save_message(reply)
+        return bot.bot_unknown(command)
   
   
 # saves bot message to db and emits chat
