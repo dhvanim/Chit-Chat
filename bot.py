@@ -20,10 +20,10 @@ def bot_about():
 
 # help mssg
 def bot_help(bot_commands):
-    help_message = "Here are a list of commands you can ask me: \n"
+    help_message = "Here are a list of commands you can ask me: "
     
     for command in bot_commands:
-        help_message += "\t" + command + "\t"
+        help_message += " " + command + " "
     
     return help_message
 
@@ -114,7 +114,24 @@ def bot_spotify(artist):
     
 # returns time elapsed string
 def bot_time(entered):
+    
     current = datetime.now()
+    
+    hrs, minutes, sec, ms = bot_time_math(entered, current)
+
+    bot_response = "You have been online for approximately "
+    if (hrs!=0):
+        bot_response += str(hrs) + " hours, "
+    if (minutes!=0):
+        bot_response += str(minutes) + " minutes, "
+    if (sec!=0):
+        bot_response += str(sec) + " seconds and "
+        
+    bot_response += str(ms) + " microseconds :o"
+    
+    return bot_response
+    
+def bot_time_math(entered, current):
     
     elapsed = current - entered
     elapsed_sec = elapsed.total_seconds()
@@ -124,18 +141,7 @@ def bot_time(entered):
     minutes = int( ( elapsed_sec - (hrs*3600) ) // 60 )
     sec = int ( elapsed_sec - (hrs*3600) - (minutes*60) )
     
-    bot_response = "You have been online for approximately "
-    if (hrs!=0):
-        bot_response += str(hrs) + " hours, "
-    if (minutes!=0):
-        bot_response += str(minutes) + " minutes, "
-    if (sec!=0):
-        bot_response += str(sec) + " seconds and "
-        
-    bot_response += str(elapsed.microseconds) + " microseconds :o"
-    
-    return bot_response
-    
+    return hrs, minutes, sec, elapsed.microseconds
     
 # unknown command
 def bot_unknown(command):
