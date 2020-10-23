@@ -1,6 +1,12 @@
 import unittest
+from os.path import dirname, join
+import sys
+sys.path.append(join(dirname(__file__), "../"))
 import app
 import bot
+
+KEY_INPUT = "input"
+KEY_EXPECTED = "expected"
 
 class MockedTestCase(unittest.TestCase):
     def setUp(self):
