@@ -6,6 +6,7 @@ import app
 import bot
 from datetime import datetime
 
+
 KEY_INPUT = "input"
 KEY_EXPECTED = "expected"
 

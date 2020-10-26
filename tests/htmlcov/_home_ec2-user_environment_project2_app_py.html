@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
-    <title>Coverage for /home/ec2-user/environment/project2/app.py: 40%</title>
+    <title>Coverage for /home/ec2-user/environment/project2/app.py: 42%</title>
     <link rel="stylesheet" href="style.css" type="text/css">
     <script type="text/javascript" src="jquery.min.js"></script>
     <script type="text/javascript" src="jquery.hotkeys.js"></script>
@@ -17,13 +17,13 @@
 <div id="header">
     <div class="content">
         <h1>Coverage for <b>/home/ec2-user/environment/project2/app.py</b> :
-            <span class="pc_cov">40%</span>
+            <span class="pc_cov">42%</span>
         </h1>
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
         <h2 class="stats">
             216 statements &nbsp;
-            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">87 run</button>
-            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">129 missing</button>
+            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">90 run</button>
+            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">126 missing</button>
             <button type="button" class="exc show_exc shortkey_x button_toggle_exc" title="Toggle lines excluded">0 excluded</button>
         </h2>
     </div>
@@ -211,9 +211,9 @@
     <p id="t158" class="pln"><span class="n"><a href="#t158">158</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t159" class="pln"><span class="n"><a href="#t159">159</a></span><span class="t"><span class="com"># updates and emits # of users from db table</span>&nbsp;</span><span class="r"></span></p>
     <p id="t160" class="run"><span class="n"><a href="#t160">160</a></span><span class="t"><span class="key">def</span> <span class="nam">emit_users_active</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t161" class="mis show_mis"><span class="n"><a href="#t161">161</a></span><span class="t">    <span class="nam">data</span> <span class="op">=</span> <span class="nam">ActiveUsers</span><span class="op">.</span><span class="nam">query</span><span class="op">.</span><span class="nam">all</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t162" class="mis show_mis"><span class="n"><a href="#t162">162</a></span><span class="t">    <span class="nam">users_active</span> <span class="op">=</span> <span class="nam">len</span><span class="op">(</span><span class="nam">data</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t163" class="mis show_mis"><span class="n"><a href="#t163">163</a></span><span class="t">    <span class="nam">socketio</span><span class="op">.</span><span class="nam">emit</span><span class="op">(</span><span class="str">'active users channel'</span><span class="op">,</span> <span class="op">{</span><span class="str">'users'</span><span class="op">:</span><span class="nam">users_active</span><span class="op">}</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t161" class="run"><span class="n"><a href="#t161">161</a></span><span class="t">    <span class="nam">data</span> <span class="op">=</span> <span class="nam">ActiveUsers</span><span class="op">.</span><span class="nam">query</span><span class="op">.</span><span class="nam">all</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t162" class="run"><span class="n"><a href="#t162">162</a></span><span class="t">    <span class="nam">users_active</span> <span class="op">=</span> <span class="nam">len</span><span class="op">(</span><span class="nam">data</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t163" class="run"><span class="n"><a href="#t163">163</a></span><span class="t">    <span class="nam">socketio</span><span class="op">.</span><span class="nam">emit</span><span class="op">(</span><span class="str">'active users channel'</span><span class="op">,</span> <span class="op">{</span><span class="str">'users'</span><span class="op">:</span><span class="nam">users_active</span><span class="op">}</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t164" class="pln"><span class="n"><a href="#t164">164</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t165" class="pln"><span class="n"><a href="#t165">165</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t166" class="pln"><span class="n"><a href="#t166">166</a></span><span class="t"><span class="com"># emits message if user joins/leaves (uses modified chat log channel)</span>&nbsp;</span><span class="r"></span></p>
@@ -404,7 +404,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.3</a>,
-            created at 2020-10-22 21:20 +0000
+            created at 2020-10-25 22:48 +0000
         </p>
     </div>
 </div>
