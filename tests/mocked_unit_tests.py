@@ -5,8 +5,7 @@ import sys
 sys.path.append(join(dirname(__file__), "../"))
 import app
 import bot
-
-from app import ActiveUsers
+import json
 
 
 KEY_INPUT = "input"
@@ -56,7 +55,27 @@ class EmitUsersActiveTest(unittest.TestCase):
             expected = test[KEY_EXPECTED]
             mocked_socket.assert_called_once_with( expected[EXPECTED_CHANNEL], expected[EXPECTED_DATA] )
             
+
+class UserChatStatusTest(unittest.TestCase):
+    def setUp(self):
+        self.success_test_params = [
+            {
+                KEY_INPUT: "hello",
+                KEY_EXPECTED: {
+                    EXPECTED_CHANNEL: "chat log channel",
+                    EXPECTED_DATA: {'chat_log': {'username':"", 'message':"hello", 'timestamp':""}, 'timestamp':""}
+                }
+            }]
+      
+    @mock.patch('app.socketio.emit')
+    def test_emit_users_active_success(self, mocked_socket):
+        for test in self.success_test_params:
             
+            app.user_chat_status( test[KEY_INPUT] )
+                
+            expected = test[KEY_EXPECTED]
+            mocked_socket.assert_called_once_with( expected[EXPECTED_CHANNEL], expected[EXPECTED_DATA] )
+
 '''
 class BotSpotifyTest(unittest.TestCase):
     def setUp(self):
@@ -72,38 +91,41 @@ class BotSpotifyTest(unittest.TestCase):
     def test_handle_links_success(self):
         return
     
-
+'''
 class BotTranslateTest(unittest.TestCase):
-    def setUp(self):
-        self.success_test_params = []
-        self.failure_test_params = []
-      
-    def test_bot_translate_success(self):
-        return
-    
-
-'''  
-
-class UserChatStatusTest(unittest.TestCase):
     def setUp(self):
         self.success_test_params = [
             {
-                KEY_INPUT: "hello",
-                KEY_EXPECTED: {
-                    EXPECTED_CHANNEL: "chat log channel",
-                    EXPECTED_DATA: {'chat_log': {'username':"", 'message':"hello", 'timestamp':""}, 'timestamp':""}
-                }
-            }]
+                KEY_INPUT: "morse",
+                KEY_EXPECTED: "-- --- .-. ... ."
+            },
+        ]
+        self.failure_test_params = []
       
-    @mock.patch('app.socketio.emit')
-    def test_emit_users_active_success(self, mocked_socket):
+    def mocked_translate_response(self, url, params):
+        class MockResponse:
+            def __init__(self, json_data):
+                self.json_data = json_data
+            
+            def json(self):
+                return self.json_data
+                
+        return MockResponse({'success': {'total':1}, 'contents':{'translated': "-- --- .-. ... ."}})
+            
         
+        
+    def test_bot_translate_success(self):
         for test in self.success_test_params:
             
-            app.user_chat_status( test[KEY_INPUT] )
-                
+            with mock.patch("app.requests.get", self.mocked_translate_response):
+                    translated = bot.bot_translate(test[KEY_INPUT])
+            
             expected = test[KEY_EXPECTED]
-            mocked_socket.assert_called_once_with( expected[EXPECTED_CHANNEL], expected[EXPECTED_DATA] )
+            
+            self.assertEqual(expected, translated)
+            
+            
+    
 
  
 
