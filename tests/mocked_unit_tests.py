@@ -55,7 +55,7 @@ class GetUsernameTest(unittest.TestCase):
             },
         ]
 
-    def test_get_username(self):
+    def test_get_username_success(self):
         for test in self.success_test_params:
             
             mocked_users = mock.MagicMock()
@@ -63,6 +63,65 @@ class GetUsernameTest(unittest.TestCase):
             
             with mock.patch("app.ActiveUsers", mocked_users):
                 response = app.get_username(test[KEY_INPUT])
+            
+            self.assertEqual(response, test[KEY_EXPECTED])
+
+class GetChatLogTest(unittest.TestCase):
+    def setUp(self):
+        self.success_test_params = [
+            {
+                KEY_INPUT: 0,
+                KEY_EXPECTED: [{
+                    "username" : "jane3apples",
+                    "auth": "Google",
+                    "icon": "httpiconpic",
+                    "message" :"hey guys what's up",
+                    "timestamp": "08.23.99",
+                    "message_type": "text"
+                }]
+            }
+        ]
+    
+    def mocked_entry(self):
+        entry = mock.MagicMock()
+        entry.username = "jane3apples"
+        entry.auth = "Google"
+        entry.icon = "httpiconpic"
+        entry.message = "hey guys what's up"
+        entry.timestamp = "08.23.99"
+        entry.message_type = "text"
+        return entry
+        
+    
+    def test_get_chat_log_success(self):
+        for test in self.success_test_params:
+            
+            mocked_log = mock.MagicMock()
+            mock_entry = self.mocked_entry()
+            mocked_log.query.all.return_value = [mock_entry]
+            
+            with mock.patch("app.ChatLog", mocked_log):
+                output = app.get_chat_log( test[KEY_INPUT] )
+            
+            self.assertEqual(output, test[KEY_EXPECTED])
+
+class BotCommandTest(unittest.TestCase):
+    def setUp(self):
+        self.success_test_params = [
+            {
+                KEY_INPUT: "!! nope",
+                KEY_EXPECTED: None
+            }]
+    
+    def mocked_handle_bot(self, message):
+            return None
+        
+    def test_bot_command_success(self):
+        for test in self.success_test_params:
+            
+            with mock.patch("app.handle_bot", self.mocked_handle_bot):
+                with mock.patch("app.bot_save_message", self.mocked_handle_bot):
+                    response = app.bot_command( test[KEY_INPUT] )
             
             self.assertEqual(response, test[KEY_EXPECTED])
             
