@@ -27,9 +27,13 @@ database_uri = os.environ['DATABASE_URL']
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
 
-db = flask_sqlalchemy.SQLAlchemy(app)
-db.init_app(app)
-db.app = app
+db = flask_sqlalchemy.SQLAlchemy()
+
+def init_db(app):
+    db.init_app(app)
+    db.app = app
+    db.create_all()
+    db.session.commit()
 
 
 ## database tables ##
@@ -76,9 +80,6 @@ class ActiveUsers(db.Model):
 
     
 ### ### ### ### ### ### 
-
-db.create_all()
-db.session.commit()
 
 
 last_emitted_timestamp = 0
@@ -340,6 +341,7 @@ def hello():
     return flask.render_template('index.html')
 
 if __name__ == '__main__': 
+    init_db(app)
     socketio.run(
         app,
         host=os.getenv('IP', '0.0.0.0'),
