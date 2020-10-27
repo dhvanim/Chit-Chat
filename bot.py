@@ -78,7 +78,7 @@ def bot_spotify(artist):
     search_url = 'https://api.spotify.com/v1/search'
     search_body_params = { 'q':artist, 'type':'artist', 'limit':1 }
     search_response = requests.get(search_url, headers=header, params=search_body_params)
-    
+
     # if api response error
     if search_response.status_code != 200:
         return "Sorry! Connection error :-("
@@ -105,7 +105,6 @@ def bot_spotify(artist):
     # gets track data and randomly picks song
     tracks_data = tracks_response.json()
     rand = random.randint(0, len(tracks_data['tracks']) - 1)
-    
     track_title = tracks_data['tracks'][rand]['name']
     
     bot_response = "You should listen to the song " + track_title + " by " + artist_name + "!! It's one of my favorites :D"
