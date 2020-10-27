@@ -17,7 +17,7 @@ export default function ChatBox() {
     }
 
     /* iterates through recieved chatlog and appends to message state */
-    chatlog.map((item) => {
+    chatlog.forEach((item) => {
       setmessages((messages) => messages.concat(item));
     });
 
@@ -79,7 +79,7 @@ export default function ChatBox() {
     if (mssgType === 'link') {
       return <span className="message"><a className="message_link" target="_blank" rel="noreferrer" href={mssg}>{mssg}</a></span>;
     } if (mssgType === 'image') {
-      return <span className="message"><img className="message_image" src={mssg} alt="Error: Image could not be displayed" /></span>;
+      return <span className="message"><img className="message_image" src={mssg} alt="Error: Could not be displayed" /></span>;
     }
     return <span className="message">{mssg}</span>;
   }
