@@ -7,6 +7,7 @@ import app
 import bot
 
 from datetime import datetime
+from alchemy_mock.mocking import UnifiedAlchemyMagicMock
 
 KEY_INPUT = "input"
 KEY_EXPECTED = "expected"
@@ -124,7 +125,66 @@ class GetChatLogTest(unittest.TestCase):
             
             self.assertEqual(output, test[KEY_EXPECTED])
   
-
+class SaveMessageTest(unittest.TestCase):
+    def setUp(self):
+        self.success_test_params = [
+            {
+                KEY_INPUT: {
+                    "mssg": "hello"
+                },
+                KEY_EXPECTED: {
+                    "username" : "jane3apples",
+                    "auth": "Google",
+                    "icon": "httpiconpic",
+                    "message" :"hello",
+                    "timestamp": "08.23.99",
+                    "message_type": "text"
+                }
+            }
+        ]
+        
+    def mock_get_serverid(self):
+        mock_id = mock.MagicMock()
+        mock_id.return_value = "1234"
+        return mock_id
+        
+    def mock_username(self):
+        mock_user = mock.MagicMock()
+        mock_user.return_value = "jane3apples"
+        return mock_user
+        
+    def mock_get_userinfo(self):
+        mocked_userinfo = mock.MagicMock()
+        mock_user = mock.MagicMock()
+        mock_user.auth = "Google"
+        mock_user.icon = "httpiconpic"
+        mocked_userinfo.query.filter_by.return_value.first.return_value = mock_user
+        return mocked_userinfo
+        
+    
+    @mock.patch('app.get_serverid')
+    @mock.patch('app.get_username')
+    @mock.patch('app.ActiveUsers')
+    @mock.patch('app.ChatLog')
+    @mock.patch('app.db.session')
+    @mock.patch('app.EMIT_CHAT_LOG')
+    def test_save_message(self, mock_serverid, mock_user, mocked_activeusersquery, mocked_chatlog, mocked_dbsession, mocked_emitchatlog):
+        
+        mock_serverid = self.mock_get_serverid()
+        mock_user = self.mock_username()
+        mocked_activeusersquery = self.mock_get_userinfo()
+        mocked_chatlog = mock.create_autospec(app.ChatLog)
+        mocked_dbsession = UnifiedAlchemyMagicMock()
+        mocked_dbsession.add(mocked_chatlog(username="", auth="", icon="", message="", timestamp="", message_type=""))
+        
+        mocked_emitchatlog = mock.MagicMock()
+        
+        for test in self.success_test_params:
+            app.save_message( test[KEY_INPUT] )
+            
+            add = test[KEY_EXPECTED]
+            mocked_dbsession.add.assert_called()
+    
 class EmitUsersActiveTest(unittest.TestCase):
     
     def setUp(self):
