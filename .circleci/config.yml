@@ -13,8 +13,11 @@ jobs:
       - python/save-cache
       - run:
           command: python tests/mocked_unit_tests.py
+          name: Mocked Chat Box Tests
+      - run:
           command: python tests/unmocked_unit_tests.py
-          name: Chat Box Test
+          name: Unmocked Chat Box Tests
+     
 
 workflows:
   main:
