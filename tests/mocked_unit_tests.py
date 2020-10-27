@@ -5,46 +5,49 @@ import sys
 sys.path.append(join(dirname(__file__), "../"))
 import app
 import bot
-import json
+import alchemy_mock
 
 
 KEY_INPUT = "input"
 KEY_EXPECTED = "expected"
+KEY_QUERY = "query"
 KEY_RESPONSE = "get_response"
 
 EXPECTED_CHANNEL = "expected channel"
 EXPECTED_DATA = "expected data"
 
-'''
+
+
+
 class EmitUsersActiveTest(unittest.TestCase):
     
     def setUp(self):
         self.success_test_params = [
             {
-                KEY_INPUT: 2,
+                KEY_QUERY: ["<ActiveUsers 1", "<ActiveUsers 2"],
                 KEY_EXPECTED: {
                     EXPECTED_CHANNEL: "active users channel",
                     EXPECTED_DATA: {"users":2}
                 }
             }
         ]
-    
-    def mocked_active_users_query(self):
-        
-        return [3, 4]
+            
     
     @mock.patch('app.socketio.emit')
     def test_emit_users_active_success(self, mocked_socket):
 
         for test in self.success_test_params:
             
-            with mock.patch("app.ActiveUsers.query.all", self.mocked_active_users_query):
+            mocked_active = mock.MagicMock()
+            mocked_active.query.all.return_value = [3, 4]
+            
+            with mock.patch("app.ActiveUsers", mocked_active):
+                
                 app.emit_users_active()
                 
             expected = test[KEY_EXPECTED]
             mocked_socket.assert_called_once_with( expected[EXPECTED_CHANNEL], expected[EXPECTED_DATA] )
-            
-'''
+
 
 class UserChatStatusTest(unittest.TestCase):
     def setUp(self):
@@ -60,7 +63,6 @@ class UserChatStatusTest(unittest.TestCase):
     @mock.patch('app.socketio.emit')
     def test_emit_users_active_success(self, mocked_socket):
         for test in self.success_test_params:
-            
             app.user_chat_status( test[KEY_INPUT] )
                 
             expected = test[KEY_EXPECTED]
@@ -83,8 +85,6 @@ class BotSpotifyTest(unittest.TestCase):
             KEY_EXPECTED: "Sorry! Connection error :-("
         }
         ]
-        
-        self.failure_test_params = []
     
     def mocked_access_token(self):
         return "temptoken"
@@ -101,23 +101,14 @@ class BotSpotifyTest(unittest.TestCase):
             response_mock.status_code = 500
         
         return response_mock
- 
-    def mocked_rand_int(self):
-        rand_mock = mock.Mock()
-        rand_mock.randint.return_value = 0
-        
-        return rand_mock
     
     @mock.patch('bot.spotify_get_access_token')
     def test_bot_spotify_success(self, mocked_access_token):
-        
         mocked_access_token = self.mocked_access_token
         
         for test in self.success_test_params:
-            
             with mock.patch('bot.requests.get', self.mocked_spotify_get_request):
                 response = bot.bot_spotify( test[KEY_INPUT] )
-            
             self.assertEqual(test[KEY_EXPECTED], response)
 
 
