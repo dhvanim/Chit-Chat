@@ -259,15 +259,109 @@ class UserChatStatusTest(unittest.TestCase):
             expected = test[KEY_EXPECTED]
             mocked_socket.assert_called_once_with( expected[EXPECTED_CHANNEL], expected[EXPECTED_DATA] )
 
+class BotSaveMessageTest(unittest.TestCase):
+    def setUp(self):
+        self.success_test_params = [
+            {
+                KEY_INPUT: "test bot message"
+            }
+        ]
+        
+    @mock.patch('app.db.session')
+    @mock.patch('app.ChatLog')
+    @mock.patch('app.EMIT_CHAT_LOG')
+    def test_bot_save_message(self, mocked_dbsession, mocked_chatlog, mocked_emitchatlog):
+        
+        mocked_dbsession = UnifiedAlchemyMagicMock()
+        mocked_chatlog = mock.create_autospec(app.ChatLog)
+        mocked_dbsession.add(mocked_chatlog)
+        mocked_emitchatlog = mock.MagicMock()
+        
+        for test in self.success_test_params:
+            app.bot_save_message( test[KEY_INPUT] )
+            
+            mocked_dbsession.add.assert_called()
 
-
-class BotCommandTest(unittest.TestCase):
+class HandleBotTest(unittest.TestCase):
+    def setUp(self):
+        self.success_test_params = [
+            {
+                KEY_INPUT: "!! translate hello there",
+                KEY_EXPECTED: ".... . .-.. .-.. --- / - .... . .-. ."
+            },
+            {
+                KEY_INPUT: "!! spotify omar",
+                KEY_EXPECTED: "You should listen to the song Ignorin' by Omar Apollo!! It's one of my favorites :D"
+            },
+            {
+                KEY_INPUT: "!! time",
+                KEY_EXPECTED: "You have been online for approximately 11 seconds and 3434 microseconds :o"
+            }
+        ]
+        
+    def mock_translate(self):
+        translate = mock.MagicMock()
+        translate.return_value = ".... . .-.. .-.. --- / - .... . .-. ."
+        return translate
+    
+    def mock_spotify(self):
+        spotify = mock.MagicMock()
+        spotify.return_value = "You should listen to the song Ignorin' by Omar Apollo!! It's one of my favorites :D"
+        return spotify
+    
+    def mock_time(self):
+        time = mock.MagicMock()
+        time.return_value = "You have been online for approximately 11 seconds and 3434 microseconds :o"
+        return time
+    
+    def mock_server(self):
+        server = mock.MagicMock()
+        server.return_value = "1234"
+        return server
+        
+    def mock_username(self):
+        username = mock.MagicMock()
+        username.return_value = "jane3apples"
+        return username
+        
+    def mock_active_users_query(self):
+        mocked_users = mock.MagicMock()
+        time = mock.MagicMock()
+        time.timestamp = "2020"
+        mocked_users.query.filter_by.return_value.first.return_value = time
+        return mocked_users
+    
+    def test_handle_bot(self):
+        
+        mocked_translate = self.mock_translate()
+        mocked_spotify = self.mock_spotify()
+        mocked_time = self.mock_time()
+        mocked_serverid = self.mock_server()
+        mocked_username = self.mock_username()
+        mocked_activeusersquery = self.mock_active_users_query()
+        
+        for test in self.success_test_params:
+            with mock.patch("app.bot.bot_translate", mocked_translate),\
+            mock.patch("app.bot.bot_spotify", mocked_spotify),\
+            mock.patch("app.bot.bot_time", mocked_time),\
+            mock.patch("app.get_serverid", mocked_serverid),\
+            mock.patch("app.get_username", mocked_username),\
+            mock.patch("app.ActiveUsers", mocked_activeusersquery):
+                
+                response = app.handle_bot(test[KEY_INPUT])
+                
+                self.assertEqual(response, test[KEY_EXPECTED])
+                
+            
+            
+class BotCommandNoneTest(unittest.TestCase):
     def setUp(self):
         self.success_test_params = [
             {
                 KEY_INPUT: "!! nope",
                 KEY_EXPECTED: None
-            }]
+            },
+        ]
     
     def mocked_handle_bot(self, message):
             return None
