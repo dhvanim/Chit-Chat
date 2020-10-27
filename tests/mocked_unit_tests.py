@@ -12,40 +12,107 @@ KEY_INPUT = "input"
 KEY_EXPECTED = "expected"
 KEY_QUERY = "query"
 KEY_RESPONSE = "get_response"
+KEY_TIME = "time"
+KEY_ROOM = "room"
 
 EXPECTED_CHANNEL = "expected channel"
 EXPECTED_DATA = "expected data"
+EXPECTED_ROOM = "expected room"
 
 
+class EmitChatLogTest(unittest.TestCase):
+    def setUp(self):
+        self.success_test_params = [
+            {
+                KEY_INPUT: {
+                    KEY_TIME: None,
+                    KEY_ROOM: None
+                },
+                KEY_EXPECTED: {
+                    EXPECTED_CHANNEL: "chat log channel",
+                    EXPECTED_DATA: {'chat_log': ["mock", "2", "2"], 'timestamp':0},
+                }
+            },
+            {
+                KEY_INPUT: {
+                    KEY_TIME: datetime.now(),
+                    KEY_ROOM: None
+                },
+                KEY_EXPECTED: {
+                    EXPECTED_CHANNEL: None,
+                    EXPECTED_DATA: None,
+                }
+            },
+            {
+                KEY_INPUT: {
+                    KEY_TIME: None,
+                    KEY_ROOM: 2345
+                },
+                KEY_EXPECTED: {
+                    EXPECTED_CHANNEL: "chat log channel",
+                    EXPECTED_DATA: {'chat_log': ["mock", "2", "2"], 'timestamp':0},
+                    EXPECTED_ROOM: 2345
+                }
+            },
+        ]
+        
+    def mocked_get_chat_log(self, timestamp):
+        mocked_log = mock.MagicMock()
+        if timestamp == None:
+            mocked_log.return_value = ["mock", "2", "2"]
+        else:
+            mocked_log.return_value = []
+        return mocked_log
+    
+    @mock.patch('app.socketio.emit')
+    def test_emit_chat_log(self, mocked_socket):
+        for test in self.success_test_params:
+            mocked_socket.reset_mock()
+            mocked_log = self.mocked_get_chat_log(test[KEY_INPUT][KEY_TIME])
+            
+            with mock.patch("app.get_chat_log", mocked_log):
+                app.EMIT_CHAT_LOG(test[KEY_INPUT][KEY_TIME], test[KEY_INPUT][KEY_ROOM])
+            
+            expected = test[KEY_EXPECTED]
+            
+            if test[KEY_INPUT][KEY_TIME] == None:
+                if EXPECTED_ROOM in expected:
+                    mocked_socket.assert_called_once_with( expected[EXPECTED_CHANNEL], expected[EXPECTED_DATA], room=expected[EXPECTED_ROOM] )
+                else:
+                    mocked_socket.assert_called_once_with( expected[EXPECTED_CHANNEL], expected[EXPECTED_DATA])
+                
 
 class EmitUsersActiveTest(unittest.TestCase):
     
     def setUp(self):
         self.success_test_params = [
             {
-                KEY_QUERY: ["<ActiveUsers 1", "<ActiveUsers 2"],
+                KEY_QUERY: ["<ActiveUsers 1>", "<ActiveUsers 2>"],
                 KEY_EXPECTED: {
                     EXPECTED_CHANNEL: "active users channel",
                     EXPECTED_DATA: {"users":2}
                 }
             }
         ]
-            
     
+    def mock_get_active_users(self):
+        mocked_active = mock.MagicMock()
+        mocked_active.query.all.return_value = [3, 4]
+        return mocked_active
+        
     @mock.patch('app.socketio.emit')
     def test_emit_users_active_success(self, mocked_socket):
 
         for test in self.success_test_params:
             
-            mocked_active = mock.MagicMock()
-            mocked_active.query.all.return_value = [3, 4]
-            
+            mocked_active = self.mock_get_active_users()
             with mock.patch("app.ActiveUsers", mocked_active):
                 
                 app.emit_users_active()
                 
             expected = test[KEY_EXPECTED]
             mocked_socket.assert_called_once_with( expected[EXPECTED_CHANNEL], expected[EXPECTED_DATA] )
+    
     
 class GetUsernameTest(unittest.TestCase):
     def setUp(self):
@@ -55,17 +122,21 @@ class GetUsernameTest(unittest.TestCase):
                 KEY_EXPECTED: "jan3apples"
             },
         ]
+    
+    def mock_get_users(self):
+        mocked_users = mock.MagicMock()
+        mocked_users.query.filter_by.return_value.first.return_value.username = "jan3apples"
+        return mocked_users    
 
     def test_get_username_success(self):
         for test in self.success_test_params:
             
-            mocked_users = mock.MagicMock()
-            mocked_users.query.filter_by.return_value.first.return_value.username = test[KEY_EXPECTED]
-            
+            mocked_users = self.mock_get_users()
             with mock.patch("app.ActiveUsers", mocked_users):
                 response = app.get_username(test[KEY_INPUT])
             
             self.assertEqual(response, test[KEY_EXPECTED])
+
 
 class GetChatLogTest(unittest.TestCase):
     def setUp(self):
@@ -93,7 +164,7 @@ class GetChatLogTest(unittest.TestCase):
         entry.message_type = "text"
         return entry
         
-    def mocked_log(self):
+    def mocked_get_log(self):
         mocked_log = mock.MagicMock()
         mock_entry = self.mocked_entry()
         mocked_log.query.all.return_value = [mock_entry]
@@ -103,8 +174,8 @@ class GetChatLogTest(unittest.TestCase):
     def test_get_chat_log_success(self):
         for test in self.success_test_params:
             
-            mock_log = self.mocked_log()
-            with mock.patch("app.ChatLog", mock_log):
+            mocked_log = self.mocked_get_log()
+            with mock.patch("app.ChatLog", mocked_log):
                 output = app.get_chat_log( test[KEY_INPUT] )
             
             self.assertEqual(output, test[KEY_EXPECTED])
@@ -126,7 +197,6 @@ class UserChatStatusTest(unittest.TestCase):
     def test_emit_users_active_success(self, mocked_socket):
         for test in self.success_test_params:
             app.user_chat_status( test[KEY_INPUT] )
-                
             expected = test[KEY_EXPECTED]
             mocked_socket.assert_called_once_with( expected[EXPECTED_CHANNEL], expected[EXPECTED_DATA] )
 
@@ -161,13 +231,16 @@ class BotTimeResponseTest(unittest.TestCase):
                 KEY_EXPECTED: "You have been online for approximately 9529 hours, 1 minutes, 1 seconds and 1 microseconds :o"
             }
         ]
+    
+    def mock_get_current_time(self):
+        mock_dt = mock.MagicMock()
+        mock_dt.now.return_value = datetime(2021, 11, 22, 19, 53, 11, 534279)
+        return mock_dt
 
     def test_bot_time_response(self):
         for test in self.success_test_params:
             
-            mock_dt = mock.MagicMock()
-            mock_dt.now.return_value = datetime(2021, 11, 22, 19, 53, 11, 534279)
-            
+            mock_dt = self.mock_get_current_time()
             with mock.patch("bot.datetime", mock_dt):
                 response = bot.bot_time(test[KEY_INPUT])
             self.assertEqual(response, test[KEY_EXPECTED])
