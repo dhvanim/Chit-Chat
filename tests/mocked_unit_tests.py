@@ -5,19 +5,19 @@ import sys
 sys.path.append(join(dirname(__file__), "../"))
 import app
 import bot
-import alchemy_mock
+
 from datetime import datetime
 
 KEY_INPUT = "input"
 KEY_EXPECTED = "expected"
 KEY_QUERY = "query"
-KEY_RESPONSE = "get_response"
+KEY_RESPONSE = "response"
 KEY_TIME = "time"
 KEY_ROOM = "room"
 
-EXPECTED_CHANNEL = "expected channel"
-EXPECTED_DATA = "expected data"
-EXPECTED_ROOM = "expected room"
+EXPECTED_CHANNEL = "channel"
+EXPECTED_DATA = "data"
+EXPECTED_ROOM = "room"
 
 
 class EmitChatLogTest(unittest.TestCase):
@@ -80,7 +80,50 @@ class EmitChatLogTest(unittest.TestCase):
                     mocked_socket.assert_called_once_with( expected[EXPECTED_CHANNEL], expected[EXPECTED_DATA], room=expected[EXPECTED_ROOM] )
                 else:
                     mocked_socket.assert_called_once_with( expected[EXPECTED_CHANNEL], expected[EXPECTED_DATA])
-                
+
+    
+class GetChatLogTest(unittest.TestCase):
+    def setUp(self):
+        self.success_test_params = [
+            {
+                KEY_INPUT: 0,
+                KEY_EXPECTED: [{
+                    "username" : "jane3apples",
+                    "auth": "Google",
+                    "icon": "httpiconpic",
+                    "message" :"hey guys what's up",
+                    "timestamp": "08.23.99",
+                    "message_type": "text"
+                }]
+            }
+        ]
+    
+    def mocked_entry(self):
+        entry = mock.MagicMock()
+        entry.username = "jane3apples"
+        entry.auth = "Google"
+        entry.icon = "httpiconpic"
+        entry.message = "hey guys what's up"
+        entry.timestamp = "08.23.99"
+        entry.message_type = "text"
+        return entry
+        
+    def mocked_get_log(self):
+        mocked_log = mock.MagicMock()
+        mock_entry = self.mocked_entry()
+        mocked_log.query.all.return_value = [mock_entry]
+        
+        return mocked_log
+    
+    def test_get_chat_log_success(self):
+        for test in self.success_test_params:
+            
+            mocked_log = self.mocked_get_log()
+            with mock.patch("app.ChatLog", mocked_log):
+                output = app.get_chat_log( test[KEY_INPUT] )
+            
+            self.assertEqual(output, test[KEY_EXPECTED])
+  
 
 class EmitUsersActiveTest(unittest.TestCase):
     
@@ -136,50 +179,6 @@ class GetUsernameTest(unittest.TestCase):
                 response = app.get_username(test[KEY_INPUT])
             
             self.assertEqual(response, test[KEY_EXPECTED])
-
-
-class GetChatLogTest(unittest.TestCase):
-    def setUp(self):
-        self.success_test_params = [
-            {
-                KEY_INPUT: 0,
-                KEY_EXPECTED: [{
-                    "username" : "jane3apples",
-                    "auth": "Google",
-                    "icon": "httpiconpic",
-                    "message" :"hey guys what's up",
-                    "timestamp": "08.23.99",
-                    "message_type": "text"
-                }]
-            }
-        ]
-    
-    def mocked_entry(self):
-        entry = mock.MagicMock()
-        entry.username = "jane3apples"
-        entry.auth = "Google"
-        entry.icon = "httpiconpic"
-        entry.message = "hey guys what's up"
-        entry.timestamp = "08.23.99"
-        entry.message_type = "text"
-        return entry
-        
-    def mocked_get_log(self):
-        mocked_log = mock.MagicMock()
-        mock_entry = self.mocked_entry()
-        mocked_log.query.all.return_value = [mock_entry]
-        
-        return mocked_log
-    
-    def test_get_chat_log_success(self):
-        for test in self.success_test_params:
-            
-            mocked_log = self.mocked_get_log()
-            with mock.patch("app.ChatLog", mocked_log):
-                output = app.get_chat_log( test[KEY_INPUT] )
-            
-            self.assertEqual(output, test[KEY_EXPECTED])
-  
 
 
 class UserChatStatusTest(unittest.TestCase):
