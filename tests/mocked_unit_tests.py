@@ -141,18 +141,14 @@ class BotTranslateTest(unittest.TestCase):
         ]
       
     def mocked_translate_response(self, url, params):
-        class MockResponse:
-            def __init__(self, json_data):
-                self.json_data = json_data
-            
-            def json(self):
-                return self.json_data
-                
+        response_mock = mock.Mock()
         if params["text"] == "morse":
-            return MockResponse({'success': {'total':1}, 'contents':{'translated': "-- --- .-. ... ."}})
+            response_mock.json.return_value = {'success': {'total':1}, 'contents':{'translated': "-- --- .-. ... ."}}
         else:
-            return MockResponse({'success': {'total':0}, 'contents':{'translated': ""}})
-            
+            response_mock.json.return_value = {'success': {'total':0}, 'contents':{'translated': ""}}
+        
+        return response_mock
+        
     def test_bot_translate_success(self):
         for test in self.success_test_params:
             
