@@ -3,7 +3,7 @@ import ChatBox from './ChatBox';
 import { Socket } from './Socket';
 import Users from './Users';
 
-import { GoogleButton } from './GoogleButton';
+import GoogleButton from './GoogleButton';
 
 export default function Content() {
   /* sends chat message to server */
