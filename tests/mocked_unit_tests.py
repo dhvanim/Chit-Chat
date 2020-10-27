@@ -17,8 +17,6 @@ EXPECTED_CHANNEL = "expected channel"
 EXPECTED_DATA = "expected data"
 
 
-
-
 class EmitUsersActiveTest(unittest.TestCase):
     
     def setUp(self):
@@ -47,7 +45,27 @@ class EmitUsersActiveTest(unittest.TestCase):
                 
             expected = test[KEY_EXPECTED]
             mocked_socket.assert_called_once_with( expected[EXPECTED_CHANNEL], expected[EXPECTED_DATA] )
+    
+class GetUsernameTest(unittest.TestCase):
+    def setUp(self):
+        self.success_test_params = [
+            {
+                KEY_INPUT: 1234,
+                KEY_EXPECTED: "jan3apples"
+            },
+        ]
 
+    def test_get_username(self):
+        for test in self.success_test_params:
+            
+            mocked_users = mock.MagicMock()
+            mocked_users.query.filter_by.return_value.first.return_value.username = test[KEY_EXPECTED]
+            
+            with mock.patch("app.ActiveUsers", mocked_users):
+                response = app.get_username(test[KEY_INPUT])
+            
+            self.assertEqual(response, test[KEY_EXPECTED])
+            
 
 class UserChatStatusTest(unittest.TestCase):
     def setUp(self):
