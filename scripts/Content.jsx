@@ -1,8 +1,7 @@
 import * as React from 'react';
 import ChatBox from './ChatBox';
-
 import { Socket } from './Socket';
-import { Users } from './Users';
+import Users from './Users';
 
 import { GoogleButton } from './GoogleButton';
 
