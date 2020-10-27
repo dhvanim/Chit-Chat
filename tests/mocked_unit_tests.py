@@ -6,7 +6,7 @@ sys.path.append(join(dirname(__file__), "../"))
 import app
 import bot
 import alchemy_mock
-
+from datetime import datetime
 
 KEY_INPUT = "input"
 KEY_EXPECTED = "expected"
@@ -15,6 +15,7 @@ KEY_RESPONSE = "get_response"
 
 EXPECTED_CHANNEL = "expected channel"
 EXPECTED_DATA = "expected data"
+
 
 
 class EmitUsersActiveTest(unittest.TestCase):
@@ -92,18 +93,44 @@ class GetChatLogTest(unittest.TestCase):
         entry.message_type = "text"
         return entry
         
+    def mocked_log(self):
+        mocked_log = mock.MagicMock()
+        mock_entry = self.mocked_entry()
+        mocked_log.query.all.return_value = [mock_entry]
+        
+        return mocked_log
     
     def test_get_chat_log_success(self):
         for test in self.success_test_params:
             
-            mocked_log = mock.MagicMock()
-            mock_entry = self.mocked_entry()
-            mocked_log.query.all.return_value = [mock_entry]
-            
-            with mock.patch("app.ChatLog", mocked_log):
+            mock_log = self.mocked_log()
+            with mock.patch("app.ChatLog", mock_log):
                 output = app.get_chat_log( test[KEY_INPUT] )
             
             self.assertEqual(output, test[KEY_EXPECTED])
+  
+
+
+class UserChatStatusTest(unittest.TestCase):
+    def setUp(self):
+        self.success_test_params = [
+            {
+                KEY_INPUT: "hello",
+                KEY_EXPECTED: {
+                    EXPECTED_CHANNEL: "chat log channel",
+                    EXPECTED_DATA: {'chat_log': {'username':"", 'message':"hello", 'timestamp':""}, 'timestamp':""}
+                }
+            }]
+      
+    @mock.patch('app.socketio.emit')
+    def test_emit_users_active_success(self, mocked_socket):
+        for test in self.success_test_params:
+            app.user_chat_status( test[KEY_INPUT] )
+                
+            expected = test[KEY_EXPECTED]
+            mocked_socket.assert_called_once_with( expected[EXPECTED_CHANNEL], expected[EXPECTED_DATA] )
+
+
 
 class BotCommandTest(unittest.TestCase):
     def setUp(self):
@@ -126,24 +153,24 @@ class BotCommandTest(unittest.TestCase):
             self.assertEqual(response, test[KEY_EXPECTED])
             
 
-class UserChatStatusTest(unittest.TestCase):
+class BotTimeResponseTest(unittest.TestCase):
     def setUp(self):
         self.success_test_params = [
             {
-                KEY_INPUT: "hello",
-                KEY_EXPECTED: {
-                    EXPECTED_CHANNEL: "chat log channel",
-                    EXPECTED_DATA: {'chat_log': {'username':"", 'message':"hello", 'timestamp':""}, 'timestamp':""}
-                }
-            }]
-      
-    @mock.patch('app.socketio.emit')
-    def test_emit_users_active_success(self, mocked_socket):
+                KEY_INPUT: datetime(2020, 10, 21, 18, 52, 10, 534278),
+                KEY_EXPECTED: "You have been online for approximately 9529 hours, 1 minutes, 1 seconds and 1 microseconds :o"
+            }
+        ]
+
+    def test_bot_time_response(self):
         for test in self.success_test_params:
-            app.user_chat_status( test[KEY_INPUT] )
-                
-            expected = test[KEY_EXPECTED]
-            mocked_socket.assert_called_once_with( expected[EXPECTED_CHANNEL], expected[EXPECTED_DATA] )
+            
+            mock_dt = mock.MagicMock()
+            mock_dt.now.return_value = datetime(2021, 11, 22, 19, 53, 11, 534279)
+            
+            with mock.patch("bot.datetime", mock_dt):
+                response = bot.bot_time(test[KEY_INPUT])
+            self.assertEqual(response, test[KEY_EXPECTED])
 
 
 class BotSpotifyTest(unittest.TestCase):
