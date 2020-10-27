@@ -211,7 +211,7 @@ def save_message(data):
     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
     message_type = handle_links(message)
     user_info = ActiveUsers.query.filter_by(username = this_username).first()
-    
+
     try:
         db.session.add(ChatLog(this_username, user_info.auth, user_info.icon, message, timestamp, message_type))
         db.session.commit()
@@ -230,19 +230,18 @@ def save_message(data):
 def handle_links(message):
     if len(message.split(" ")) > 1:
         return "text"
-    try:
-        result = urlparse(message)
+
+    result = urlparse(message)
         
-        if not all([result.scheme, result.netloc, result.path]):
-            return "text"
-            
-        path = result.path
-        if path.endswith(".jpg") or path.endswith(".jpeg") or path.endswith(".png") or path.endswith(".gif"):
-            return "image"
-        return "link"
-    except:
+    if not all([result.scheme, result.netloc, result.path]):
         return "text"
-    
+            
+    path = result.path
+    if path.endswith(".jpg") or path.endswith(".jpeg") or path.endswith(".png") or path.endswith(".gif"):
+        return "image"
+        
+    return "link"
+
 
 # sends err mssg with empty user and time
 def message_recieve_fail(username):

@@ -13,6 +13,12 @@
     "babel-core": "7.0.0-bridge.0",
     "babel-loader": "^8.0.5",
     "css-loader": "^3.4.2",
+    "eslint": "^7.12.1",
+    "eslint-config-airbnb": "^18.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-react": "^7.21.5",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "extract-text-webpack-plugin": "^2.1.2",
     "file-loader": "^0.11.2",
     "jquery": "^3.2.1",
@@ -33,5 +39,22 @@
     "react-facebook-login": "^4.1.1",
     "react-google-login": "^5.1.21",
     "socket.io-client": "^2.3.1"
-  }
+  },
+  "name": "project2",
+  "description": "## 0. Clone this repo and cd into it ```$ git clone https://github.com/NJIT-CS490/project2-m1-dmm77``` <br />",
+  "version": "1.0.0",
+  "main": "webpack.config.js",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NJIT-CS490/project2-m3-dmm77.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NJIT-CS490/project2-m3-dmm77/issues"
+  },
+  "homepage": "https://github.com/NJIT-CS490/project2-m3-dmm77#readme"
 }
