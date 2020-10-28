@@ -322,11 +322,11 @@ def handle_bot(message):
         return bot.bot_unknown(command)
 
 # saves bot message to db and emits chat
-def bot_save_message(message):
+def bot_save_message(mssg):
     username = "chit-chat-bot"
     auth = "Bot"
     icon = "./static/boticon.jpg"
-    message = message
+    message = mssg
     timestamp = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 
     db.session.add(ChatLog(username, auth, icon, message, timestamp, "bot"))
