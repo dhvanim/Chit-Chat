@@ -16,8 +16,8 @@ spotify_secret = os.environ['SPOTIFY_CLIENT_SECRET']
 
 # about mssg
 def bot_about():
-    return "Hi guys! My name is chit-chat-bot and I'm here\
-        to help! Type '!! help' to learn more :-))"
+    return "Hi guys! My name is chit-chat-bot and I'm here " + \
+        "to help! Type '!! help' to learn more :-))"
 
 
 # help mssg

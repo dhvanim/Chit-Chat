@@ -96,7 +96,7 @@ class EmitChatLogTest(unittest.TestCase):
             mocked_log = self.mocked_get_chat_log(test[KEY_INPUT][KEY_TIME])
             
             with mock.patch("app.get_chat_log", mocked_log):
-                app.EMIT_CHAT_LOG(test[KEY_INPUT][KEY_TIME], test[KEY_INPUT][KEY_ROOM])
+                app.emit_chat_log(test[KEY_INPUT][KEY_TIME], test[KEY_INPUT][KEY_ROOM])
             
             expected = test[KEY_EXPECTED]
             
@@ -191,7 +191,7 @@ class SaveMessageTest(unittest.TestCase):
     @mock.patch('app.ActiveUsers')
     @mock.patch('app.ChatLog')
     @mock.patch('app.db.session')
-    @mock.patch('app.EMIT_CHAT_LOG')
+    @mock.patch('app.emit_chat_log')
     def test_save_message(self, mock_serverid, mock_user, mocked_activeusersquery, mocked_chatlog, mocked_dbsession, mocked_emitchatlog):
         
         mock_serverid = self.mock_get_serverid()
@@ -318,7 +318,7 @@ class BotSaveMessageTest(unittest.TestCase):
         
     @mock.patch('app.db.session')
     @mock.patch('app.ChatLog')
-    @mock.patch('app.EMIT_CHAT_LOG')
+    @mock.patch('app.emit_chat_log')
     def test_bot_save_message(self, mocked_dbsession, mocked_chatlog, mocked_emitchatlog):
         
         mocked_dbsession = UnifiedAlchemyMagicMock()
@@ -522,7 +522,7 @@ class BotTranslateTest(unittest.TestCase):
     def test_bot_translate_success(self):
         for test in self.success_test_params:
             
-            with mock.patch("app.requests.get", self.mocked_translate_response):
+            with mock.patch("bot.requests.get", self.mocked_translate_response):
                     translated = bot.bot_translate(test[KEY_INPUT])
             expected = test[KEY_EXPECTED]
             
@@ -530,7 +530,7 @@ class BotTranslateTest(unittest.TestCase):
     
     def test_bot_translate_failure(self):
         for test in self.failure_test_params:
-            with mock.patch("app.requests.get", self.mocked_translate_response):
+            with mock.patch("bot.requests.get", self.mocked_translate_response):
                     translated = bot.bot_translate(test[KEY_INPUT])
             expected = test[KEY_EXPECTED]
             
