@@ -1,5 +1,7 @@
 # Chat Room #
 
+** Link to this application: https://chit-chat-chatroom.herokuapp.com/ **
+
 ## 0. Clone this repo and cd into it
 ```$ git clone https://github.com/NJIT-CS490/project2-m1-dmm77```
 <br />
